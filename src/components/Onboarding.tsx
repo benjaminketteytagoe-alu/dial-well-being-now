@@ -23,16 +23,8 @@ const Onboarding = () => {
     }
   });
 
-  const steps = [
-    { component: WelcomeStep, title: "Welcome to NauriCare" },
-    { component: PersonalInfoStep, title: "Personal Information" },
-    { component: HealthPreferencesStep, title: "Health Preferences" },
-    { component: NotificationStep, title: "Notifications" },
-    { component: CompletionStep, title: "All Set!" }
-  ];
-
   const nextStep = () => {
-    if (currentStep < steps.length - 1) {
+    if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -47,7 +39,65 @@ const Onboarding = () => {
     setUserData(prev => ({ ...prev, ...data }));
   };
 
-  const CurrentStepComponent = steps[currentStep].component;
+  const renderCurrentStep = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <WelcomeStep
+            nextStep={nextStep}
+            isFirst={true}
+          />
+        );
+      case 1:
+        return (
+          <PersonalInfoStep
+            userData={userData}
+            updateUserData={updateUserData}
+            nextStep={nextStep}
+            prevStep={prevStep}
+            isFirst={false}
+          />
+        );
+      case 2:
+        return (
+          <HealthPreferencesStep
+            userData={userData}
+            updateUserData={updateUserData}
+            nextStep={nextStep}
+            prevStep={prevStep}
+            isFirst={false}
+          />
+        );
+      case 3:
+        return (
+          <NotificationStep
+            userData={userData}
+            updateUserData={updateUserData}
+            nextStep={nextStep}
+            prevStep={prevStep}
+            isFirst={false}
+          />
+        );
+      case 4:
+        return (
+          <CompletionStep
+            userData={userData}
+            prevStep={prevStep}
+            isLast={true}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  const steps = [
+    "Welcome to NauriCare",
+    "Personal Information", 
+    "Health Preferences",
+    "Notifications",
+    "All Set!"
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-red-50 flex items-center justify-center px-4">
@@ -68,21 +118,14 @@ const Onboarding = () => {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-gray-800">
-            {steps[currentStep].title}
+            {steps[currentStep]}
           </CardTitle>
           <CardDescription>
             Step {currentStep + 1} of {steps.length}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <CurrentStepComponent
-            userData={userData}
-            updateUserData={updateUserData}
-            nextStep={nextStep}
-            prevStep={prevStep}
-            isFirst={currentStep === 0}
-            isLast={currentStep === steps.length - 1}
-          />
+          {renderCurrentStep()}
         </CardContent>
       </Card>
     </div>
