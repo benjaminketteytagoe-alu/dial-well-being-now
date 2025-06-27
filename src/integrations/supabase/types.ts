@@ -75,6 +75,36 @@ export type Database = {
         }
         Relationships: []
       }
+      symptoms_checks: {
+        Row: {
+          abdominal_pain: boolean
+          created_at: string
+          discomfort_rating: number
+          id: string
+          irregular_periods: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          abdominal_pain: boolean
+          created_at?: string
+          discomfort_rating: number
+          id?: string
+          irregular_periods: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          abdominal_pain?: boolean
+          created_at?: string
+          discomfort_rating?: number
+          id?: string
+          irregular_periods?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

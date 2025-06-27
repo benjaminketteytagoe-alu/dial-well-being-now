@@ -4,43 +4,46 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { ArrowLeft, Calendar as CalendarIcon, Clock } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 
 const BookDoctor = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { toast } = useToast();
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState('');
   const [doctorName, setDoctorName] = useState('');
   const [notes, setNotes] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const timeSlots = [
     '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00'
+    '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
   ];
 
-  const doctors = [
-    'Dr. Sarah Johnson - Gynecologist',
-    'Dr. Mary Wanjiku - Reproductive Health Specialist',
-    'Dr. Grace Muthoni - Women\'s Health Expert',
-    'Dr. Jane Kamau - OBGYN Specialist'
-  ];
-
-  const handleBookAppointment = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedDate || !selectedTime || !doctorName) {
+    if (!user) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields",
+        title: "Authentication Required",
+        description: "Please sign in to book an appointment.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!selectedDate || !selectedTime || !doctorName.trim()) {
+      toast({
+        title: "Incomplete Form",
+        description: "Please fill in all required fields.",
         variant: "destructive"
       });
       return;
@@ -52,19 +55,21 @@ const BookDoctor = () => {
       const { error } = await supabase
         .from('appointments')
         .insert({
-          user_id: user?.id,
-          doctor_name: doctorName,
-          appointment_date: selectedDate.toISOString().split('T')[0],
+          user_id: user.id,
+          doctor_name: doctorName.trim(),
+          appointment_date: format(selectedDate, 'yyyy-MM-dd'),
           appointment_time: selectedTime,
-          notes: notes || null,
+          notes: notes.trim() || null,
           status: 'scheduled'
         });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       toast({
-        title: "Appointment Booked!",
-        description: `Your appointment with ${doctorName} has been scheduled for ${selectedDate.toLocaleDateString()} at ${selectedTime}`,
+        title: "Appointment Booked",
+        description: `Your appointment with ${doctorName} on ${format(selectedDate, 'PPP')} at ${selectedTime} has been scheduled.`,
       });
 
       // Reset form
@@ -72,14 +77,12 @@ const BookDoctor = () => {
       setSelectedTime('');
       setDoctorName('');
       setNotes('');
-      
-      // Navigate back to home after a short delay
-      setTimeout(() => navigate('/home'), 2000);
 
-    } catch (error: any) {
+    } catch (error) {
+      console.error('Error booking appointment:', error);
       toast({
-        title: "Booking Failed",
-        description: error.message || "Failed to book appointment. Please try again.",
+        title: "Booking Error",
+        description: "Failed to book your appointment. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -104,122 +107,123 @@ const BookDoctor = () => {
         </div>
       </header>
 
-      <div className="max-w-2xl mx-auto p-6">
+      <div className="max-w-4xl mx-auto p-6">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-800 mb-2">
             Schedule Your Appointment
           </h2>
           <p className="text-gray-600">
-            Book a consultation with our women's health specialists
+            Choose a convenient date and time for your consultation
           </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <CalendarIcon className="w-5 h-5 text-green-600" />
-              <span>Appointment Details</span>
-            </CardTitle>
-            <CardDescription>
-              Choose your preferred date, time, and doctor
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleBookAppointment} className="space-y-6">
-              {/* Doctor Selection */}
-              <div>
-                <Label className="text-base font-semibold">Select Doctor *</Label>
-                <Select value={doctorName} onValueChange={setDoctorName}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Choose a doctor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {doctors.map((doctor) => (
-                      <SelectItem key={doctor} value={doctor}>
-                        {doctor}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Calendar */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <CalendarIcon className="w-5 h-5" />
+                <span>Select Date</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                disabled={(date) => date < new Date() || date.getDay() === 0 || date.getDay() === 6}
+                className="rounded-md border"
+              />
+            </CardContent>
+          </Card>
 
-              {/* Date Selection */}
-              <div>
-                <Label className="text-base font-semibold mb-3 block">Select Date *</Label>
-                <Card className="p-4">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    disabled={(date) => date < new Date() || date.getDay() === 0 || date.getDay() === 6}
-                    className="rounded-md border"
+          {/* Appointment Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Clock className="w-5 h-5" />
+                <span>Appointment Details</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Doctor Name */}
+                <div>
+                  <Label htmlFor="doctor-name">Doctor Name *</Label>
+                  <Input
+                    id="doctor-name"
+                    value={doctorName}
+                    onChange={(e) => setDoctorName(e.target.value)}
+                    placeholder="Enter doctor's name"
+                    required
                   />
-                </Card>
-                <p className="text-sm text-gray-600 mt-2">
-                  * Weekends are not available for appointments
-                </p>
-              </div>
-
-              {/* Time Selection */}
-              <div>
-                <Label className="text-base font-semibold">Select Time *</Label>
-                <div className="grid grid-cols-3 gap-2 mt-2">
-                  {timeSlots.map((time) => (
-                    <Button
-                      key={time}
-                      type="button"
-                      variant={selectedTime === time ? "default" : "outline"}
-                      onClick={() => setSelectedTime(time)}
-                      className={`${
-                        selectedTime === time 
-                          ? "bg-gradient-to-r from-green-500 to-emerald-500" 
-                          : ""
-                      }`}
-                    >
-                      <Clock className="w-4 h-4 mr-1" />
-                      {time}
-                    </Button>
-                  ))}
                 </div>
-              </div>
 
-              {/* Notes */}
-              <div>
-                <Label htmlFor="notes" className="text-base font-semibold">Additional Notes (Optional)</Label>
-                <Input
-                  id="notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Any specific concerns or symptoms to discuss..."
-                  className="mt-2"
-                />
-              </div>
+                {/* Time Selection */}
+                <div>
+                  <Label className="text-base font-semibold mb-3 block">
+                    Available Time Slots *
+                  </Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {timeSlots.map((time) => (
+                      <Button
+                        key={time}
+                        type="button"
+                        variant={selectedTime === time ? "default" : "outline"}
+                        className={`${
+                          selectedTime === time 
+                            ? "bg-gradient-to-r from-green-500 to-emerald-500" 
+                            : ""
+                        }`}
+                        onClick={() => setSelectedTime(time)}
+                      >
+                        {time}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
 
-              {/* Appointment Summary */}
-              {selectedDate && selectedTime && doctorName && (
-                <Card className="bg-green-50 border-green-200">
-                  <CardContent className="p-4">
-                    <h4 className="font-semibold text-green-800 mb-2">Appointment Summary:</h4>
-                    <div className="text-sm text-green-700 space-y-1">
-                      <p><strong>Doctor:</strong> {doctorName}</p>
-                      <p><strong>Date:</strong> {selectedDate.toLocaleDateString()}</p>
-                      <p><strong>Time:</strong> {selectedTime}</p>
-                      {notes && <p><strong>Notes:</strong> {notes}</p>}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                {/* Notes */}
+                <div>
+                  <Label htmlFor="notes">Additional Notes</Label>
+                  <Textarea
+                    id="notes"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Any specific concerns or requirements..."
+                    rows={3}
+                  />
+                </div>
 
-              <Button 
-                type="submit" 
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-                disabled={loading || !selectedDate || !selectedTime || !doctorName}
-              >
-                {loading ? 'Booking Appointment...' : 'Book Appointment'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                {/* Selected Details */}
+                {selectedDate && selectedTime && (
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg">
+                    <h3 className="font-semibold text-green-800 mb-2">Appointment Summary</h3>
+                    <p className="text-green-700">
+                      <strong>Date:</strong> {format(selectedDate, 'PPP')}
+                    </p>
+                    <p className="text-green-700">
+                      <strong>Time:</strong> {selectedTime}
+                    </p>
+                    {doctorName && (
+                      <p className="text-green-700">
+                        <strong>Doctor:</strong> {doctorName}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                  disabled={loading || !selectedDate || !selectedTime || !doctorName.trim()}
+                >
+                  {loading ? 'Booking...' : 'Book Appointment'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
