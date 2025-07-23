@@ -5,39 +5,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 import { ArrowLeft, Search, AlertTriangle } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 
 const SymptomChecker = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     abdominalPain: '',
     irregularPeriods: '',
-    discomfortRating: [5]
+    discomfortRating: [5],
+    email: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to submit your symptoms.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!formData.abdominalPain || !formData.irregularPeriods) {
+    if (!formData.abdominalPain || !formData.irregularPeriods || !formData.email) {
       toast({
         title: "Incomplete Form",
-        description: "Please answer all questions.",
+        description: "Please answer all questions and provide your email.",
         variant: "destructive"
       });
       return;
@@ -46,36 +36,35 @@ const SymptomChecker = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('symptoms_checks')
-        .insert({
-          user_id: user.id,
-          abdominal_pain: formData.abdominalPain === 'yes',
-          irregular_periods: formData.irregularPeriods === 'yes',
-          discomfort_rating: formData.discomfortRating[0]
+      const formElement = e.target as HTMLFormElement;
+      const formDataToSubmit = new FormData(formElement);
+      
+      const response = await fetch('https://formsubmit.co/ajax/your-email@example.com', {
+        method: 'POST',
+        body: formDataToSubmit
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Symptoms Submitted",
+          description: "Your symptom check has been submitted successfully.",
         });
 
-      if (error) {
-        throw error;
+        // Reset form
+        setFormData({
+          abdominalPain: '',
+          irregularPeriods: '',
+          discomfortRating: [5],
+          email: ''
+        });
+      } else {
+        throw new Error('Submission failed');
       }
-
-      toast({
-        title: "Symptoms Recorded",
-        description: "Your symptom check has been saved successfully.",
-      });
-
-      // Reset form
-      setFormData({
-        abdominalPain: '',
-        irregularPeriods: '',
-        discomfortRating: [5]
-      });
-
     } catch (error) {
       console.error('Error submitting symptoms:', error);
       toast({
         title: "Submission Error",
-        description: "Failed to save your symptoms. Please try again.",
+        description: "Failed to submit your symptoms. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -121,6 +110,27 @@ const SymptomChecker = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Hidden FormSubmit fields */}
+              <input type="hidden" name="_next" value={window.location.origin + '/home'} />
+              <input type="hidden" name="_subject" value="New Symptom Check Submission" />
+              <input type="hidden" name="_captcha" value="false" />
+              
+              {/* Email */}
+              <div>
+                <Label htmlFor="email" className="text-base font-semibold mb-3 block">
+                  Your Email
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({...prev, email: e.target.value}))}
+                  placeholder="Enter your email address"
+                  required
+                />
+              </div>
+
               {/* Abdominal Pain */}
               <div>
                 <Label className="text-base font-semibold mb-3 block">
@@ -139,6 +149,7 @@ const SymptomChecker = () => {
                     <Label htmlFor="pain-no">No</Label>
                   </div>
                 </RadioGroup>
+                <input type="hidden" name="abdominal_pain" value={formData.abdominalPain} />
               </div>
 
               {/* Irregular Periods */}
@@ -159,6 +170,7 @@ const SymptomChecker = () => {
                     <Label htmlFor="irregular-no">No</Label>
                   </div>
                 </RadioGroup>
+                <input type="hidden" name="irregular_periods" value={formData.irregularPeriods} />
               </div>
 
               {/* Discomfort Rating */}
@@ -181,6 +193,7 @@ const SymptomChecker = () => {
                     <span>10 - Severe</span>
                   </div>
                 </div>
+                <input type="hidden" name="discomfort_rating" value={formData.discomfortRating[0]} />
               </div>
 
               <Button 

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Calendar as CalendarIcon, Clock } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -20,8 +21,17 @@ const BookDoctor = () => {
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState('');
-  const [doctorName, setDoctorName] = useState('');
+  const [selectedDoctor, setSelectedDoctor] = useState('');
   const [notes, setNotes] = useState('');
+
+  const doctors = [
+    { id: 'dr-sarah-johnson', name: 'Dr. Sarah Johnson', specialty: 'Gynecologist' },
+    { id: 'dr-michael-chen', name: 'Dr. Michael Chen', specialty: 'Internal Medicine' },
+    { id: 'dr-emily-davis', name: 'Dr. Emily Davis', specialty: 'Family Medicine' },
+    { id: 'dr-robert-wilson', name: 'Dr. Robert Wilson', specialty: 'Endocrinologist' },
+    { id: 'dr-lisa-martinez', name: 'Dr. Lisa Martinez', specialty: 'Gynecologist' },
+    { id: 'dr-david-brown', name: 'Dr. David Brown', specialty: 'Internal Medicine' }
+  ];
 
   const timeSlots = [
     '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
@@ -40,7 +50,7 @@ const BookDoctor = () => {
       return;
     }
 
-    if (!selectedDate || !selectedTime || !doctorName.trim()) {
+    if (!selectedDate || !selectedTime || !selectedDoctor) {
       toast({
         title: "Incomplete Form",
         description: "Please fill in all required fields.",
@@ -52,11 +62,13 @@ const BookDoctor = () => {
     setLoading(true);
 
     try {
+      const selectedDoctorInfo = doctors.find(d => d.id === selectedDoctor);
+      
       const { error } = await supabase
         .from('appointments')
         .insert({
           user_id: user.id,
-          doctor_name: doctorName.trim(),
+          doctor_name: selectedDoctorInfo?.name || selectedDoctor,
           appointment_date: format(selectedDate, 'yyyy-MM-dd'),
           appointment_time: selectedTime,
           notes: notes.trim() || null,
@@ -69,13 +81,13 @@ const BookDoctor = () => {
 
       toast({
         title: "Appointment Booked",
-        description: `Your appointment with ${doctorName} on ${format(selectedDate, 'PPP')} at ${selectedTime} has been scheduled.`,
+        description: `Your appointment with ${selectedDoctorInfo?.name} on ${format(selectedDate, 'PPP')} at ${selectedTime} has been scheduled.`,
       });
 
       // Reset form
       setSelectedDate(undefined);
       setSelectedTime('');
-      setDoctorName('');
+      setSelectedDoctor('');
       setNotes('');
 
     } catch (error) {
@@ -89,6 +101,8 @@ const BookDoctor = () => {
       setLoading(false);
     }
   };
+
+  const selectedDoctorInfo = doctors.find(d => d.id === selectedDoctor);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-red-50">
@@ -147,16 +161,29 @@ const BookDoctor = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Doctor Name */}
+                {/* Doctor Selection */}
                 <div>
-                  <Label htmlFor="doctor-name">Doctor Name *</Label>
-                  <Input
-                    id="doctor-name"
-                    value={doctorName}
-                    onChange={(e) => setDoctorName(e.target.value)}
-                    placeholder="Enter doctor's name"
-                    required
-                  />
+                  <Label htmlFor="doctor-select">Select Doctor *</Label>
+                  <Select value={selectedDoctor} onValueChange={setSelectedDoctor}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a doctor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {doctors.map((doctor) => (
+                        <SelectItem key={doctor.id} value={doctor.id}>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{doctor.name}</span>
+                            <span className="text-sm text-gray-500">{doctor.specialty}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {selectedDoctorInfo && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      Specialty: {selectedDoctorInfo.specialty}
+                    </p>
+                  )}
                 </div>
 
                 {/* Time Selection */}
@@ -196,27 +223,25 @@ const BookDoctor = () => {
                 </div>
 
                 {/* Selected Details */}
-                {selectedDate && selectedTime && (
+                {selectedDate && selectedTime && selectedDoctorInfo && (
                   <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg">
                     <h3 className="font-semibold text-green-800 mb-2">Appointment Summary</h3>
+                    <p className="text-green-700">
+                      <strong>Doctor:</strong> {selectedDoctorInfo.name} ({selectedDoctorInfo.specialty})
+                    </p>
                     <p className="text-green-700">
                       <strong>Date:</strong> {format(selectedDate, 'PPP')}
                     </p>
                     <p className="text-green-700">
                       <strong>Time:</strong> {selectedTime}
                     </p>
-                    {doctorName && (
-                      <p className="text-green-700">
-                        <strong>Doctor:</strong> {doctorName}
-                      </p>
-                    )}
                   </div>
                 )}
 
                 <Button 
                   type="submit" 
                   className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-                  disabled={loading || !selectedDate || !selectedTime || !doctorName.trim()}
+                  disabled={loading || !selectedDate || !selectedTime || !selectedDoctor}
                 >
                   {loading ? 'Booking...' : 'Book Appointment'}
                 </Button>
