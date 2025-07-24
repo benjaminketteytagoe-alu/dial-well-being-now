@@ -24,7 +24,7 @@ const Index = () => {
             <div className="flex items-center space-x-2">
               <img  
                 className="h-8 w-auto"
-                src="../../public/NauriCare ColorB.png"
+                src="https://i.ibb.co/4ZyKvZJx/Nauri-Care-Color-B.png"
                 alt="logo"
               />
             </div>

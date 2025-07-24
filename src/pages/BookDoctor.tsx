@@ -115,7 +115,7 @@ const BookDoctor = () => {
           <div className="flex items-center space-x-3">
             <img  
               className="h-8 w-auto"
-              src="../../public/logo1b.png"
+              src="https://i.ibb.co/whR2z9DX/logo1b.png"
               alt="logo"
             />
             <h1 className="text-xl font-bold text-gray-800">Book Doctor</h1>

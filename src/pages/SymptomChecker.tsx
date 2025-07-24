@@ -84,7 +84,7 @@ const SymptomChecker = () => {
             <div className="flex items-center space-x-2">
               <img  
                 className="h-8 w-auto"
-                src="../../public/logo1b.png"
+                src="https://i.ibb.co/whR2z9DX/logo1b.png"
                 alt="logo"
               />
             </div>

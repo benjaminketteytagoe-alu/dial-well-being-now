@@ -93,7 +93,7 @@ const Auth = () => {
           <div className="mx-auto w-auto h-12">
             <img
               className="h-9 w-auto"
-              src="../../public/NauriCare ColorB.png"
+              src="https://i.ibb.co/4ZyKvZJx/Nauri-Care-Color-B.png"
               alt="logo"
             />
           </div>
