@@ -22,9 +22,11 @@ const Index = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 text-lg font-semibold">
-                NauriCare
-              </Badge>
+              <img  
+                className="h-8 w-auto"
+                src="../../public/NauriCare ColorB.png"
+                alt="logo"
+              />
             </div>
             <div className="flex items-center space-x-4">
               <Button 

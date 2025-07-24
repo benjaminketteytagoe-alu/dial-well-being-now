@@ -17,8 +17,12 @@ const HealthInfo = () => {
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-              <Heart className="w-4 h-4 text-white" />
+            <div className="flex items-center space-x-2">
+              <img  
+                className="h-8 w-auto"
+                src="../../public/logo1b.png"
+                alt="logo"
+              />
             </div>
             <h1 className="text-xl font-bold text-gray-800">Health Information</h1>
           </div>

@@ -81,8 +81,12 @@ const SymptomChecker = () => {
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-              <Search className="w-4 h-4 text-white" />
+            <div className="flex items-center space-x-2">
+              <img  
+                className="h-8 w-auto"
+                src="../../public/logo1b.png"
+                alt="logo"
+              />
             </div>
             <h1 className="text-xl font-bold text-gray-800">Symptom Checker</h1>
           </div>

@@ -21,8 +21,12 @@ const Home = () => {
       <header className="bg-white shadow-sm border-b p-4">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-              <Heart className="w-5 h-5 text-white" />
+            <div className="flex items-center space-x-2">
+              <img  
+                className="h-8 w-auto"
+                src="../../public/logo1b.png"
+                alt="logo"
+              />
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-800">NauriCare</h1>

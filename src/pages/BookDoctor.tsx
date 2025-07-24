@@ -113,9 +113,11 @@ const BookDoctor = () => {
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-              <CalendarIcon className="w-4 h-4 text-white" />
-            </div>
+            <img  
+              className="h-8 w-auto"
+              src="../../public/logo1b.png"
+              alt="logo"
+            />
             <h1 className="text-xl font-bold text-gray-800">Book Doctor</h1>
           </div>
         </div>

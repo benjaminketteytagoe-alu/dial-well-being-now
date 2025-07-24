@@ -90,8 +90,12 @@ const Auth = () => {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-red-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mb-4">
-            <Heart className="w-6 h-6 text-white" />
+          <div className="mx-auto w-auto h-12">
+            <img
+              className="h-9 w-auto"
+              src="../../public/NauriCare ColorB.png"
+              alt="logo"
+            />
           </div>
           <CardTitle className="text-2xl font-bold">Welcome to NauriCare</CardTitle>
           <CardDescription>
