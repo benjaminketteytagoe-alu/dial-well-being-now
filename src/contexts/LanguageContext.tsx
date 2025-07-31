@@ -40,6 +40,7 @@ const translations = {
     'auth.creatingAccount': 'Creating Account...',
     'auth.connecting': 'Connecting...',
     'auth.selectLanguage': 'Select Language',
+    'auth.back': 'Back to Home',
     
     // Symptom Checker
     'symptom.title': 'Symptom Checker',
@@ -108,6 +109,7 @@ const translations = {
     'auth.creatingAccount': 'Kuunda akaunti...',
     'auth.connecting': 'Kuunganisha...',
     'auth.selectLanguage': 'Chagua Lugha',
+    'auth.back': 'Rudi Nyumbani',
     
     // Symptom Checker
     'symptom.title': 'Kikagua Dalili',
@@ -176,6 +178,7 @@ const translations = {
     'auth.creatingAccount': 'Gukora konti...',
     'auth.connecting': 'Guhuza...',
     'auth.selectLanguage': 'Hitamo Ururimi',
+    'auth.back': 'Subira Ahabanza',
     
     // Symptom Checker
     'symptom.title': 'Igenzura Ibimenyetso',

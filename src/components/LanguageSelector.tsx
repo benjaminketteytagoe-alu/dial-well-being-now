@@ -1,7 +1,6 @@
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage, Language } from '@/contexts/LanguageContext';
-import { Globe } from 'lucide-react';
 
 export const LanguageSelector: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -13,8 +12,7 @@ export const LanguageSelector: React.FC = () => {
   ];
 
   return (
-    <div className="flex items-center space-x-2">
-      <Globe className="h-4 w-4 text-primary" />
+    <div className="flex items-center">
       <Select value={language} onValueChange={(value: Language) => setLanguage(value)}>
         <SelectTrigger className="w-40">
           <SelectValue>

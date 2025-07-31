@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { Heart } from 'lucide-react';
+import { Heart, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSelector } from '@/components/LanguageSelector';
@@ -91,7 +91,17 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-brand-light flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-brand-shadow">
+      <div className="w-full max-w-md relative">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/')}
+          className="absolute -top-12 left-0 text-brand-dark hover:text-brand-primary"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          {t('auth.back')}
+        </Button>
+        <Card className="w-full shadow-brand-shadow">
         <CardHeader className="text-center space-y-4">
           <div className="mx-auto w-auto h-12">
             <img
@@ -209,7 +219,8 @@ const Auth = () => {
             </Button>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 };
