@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from '@/hooks/useAuth';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -21,12 +22,12 @@ const queryClient = new QueryClient();
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  if (loading) {
+      if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-red-50 flex items-center justify-center">
+      <div className="min-h-screen bg-brand-light flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full animate-pulse mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="w-12 h-12 bg-primary rounded-full animate-pulse mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -43,12 +44,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  if (loading) {
+      if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-red-50 flex items-center justify-center">
+      <div className="min-h-screen bg-brand-light flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full animate-pulse mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="w-12 h-12 bg-primary rounded-full animate-pulse mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -67,7 +68,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
           <Routes>
             <Route path="/" element={
               <PublicRoute>
@@ -113,6 +115,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
+        </LanguageProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

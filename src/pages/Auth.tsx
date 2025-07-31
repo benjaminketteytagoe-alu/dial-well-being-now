@@ -10,6 +10,8 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -19,6 +21,7 @@ const Auth = () => {
   const { signIn, signUp, signInWithGoogle, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (user) {
@@ -87,9 +90,9 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-red-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
+    <div className="min-h-screen bg-brand-light flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-brand-shadow">
+        <CardHeader className="text-center space-y-4">
           <div className="mx-auto w-auto h-12">
             <img
               className="h-9 w-auto"
@@ -97,22 +100,25 @@ const Auth = () => {
               alt="logo"
             />
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome to NauriCare</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('auth.welcome')}</CardTitle>
           <CardDescription>
-            Your trusted companion for women's health
+            {t('auth.tagline')}
           </CardDescription>
+          <div className="flex justify-center">
+            <LanguageSelector />
+          </div>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="signin">{t('auth.signIn')}</TabsTrigger>
+              <TabsTrigger value="signup">{t('auth.signUp')}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('auth.email')}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -122,7 +128,7 @@ const Auth = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t('auth.password')}</Label>
                   <Input
                     id="password"
                     type="password"
@@ -133,10 +139,10 @@ const Auth = () => {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                  className="w-full bg-primary hover:bg-primary/90"
                   disabled={loading}
                 >
-                  {loading ? 'Signing In...' : 'Sign In'}
+                  {loading ? t('auth.signingIn') : t('auth.signIn')}
                 </Button>
               </form>
             </TabsContent>
@@ -144,7 +150,7 @@ const Auth = () => {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div>
-                  <Label htmlFor="fullName">Full Name</Label>
+                  <Label htmlFor="fullName">{t('auth.fullName')}</Label>
                   <Input
                     id="fullName"
                     value={fullName}
@@ -153,7 +159,7 @@ const Auth = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="signupEmail">Email</Label>
+                  <Label htmlFor="signupEmail">{t('auth.email')}</Label>
                   <Input
                     id="signupEmail"
                     type="email"
@@ -163,7 +169,7 @@ const Auth = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="signupPassword">Password</Label>
+                  <Label htmlFor="signupPassword">{t('auth.password')}</Label>
                   <Input
                     id="signupPassword"
                     type="password"
@@ -174,10 +180,10 @@ const Auth = () => {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                  className="w-full bg-primary hover:bg-primary/90"
                   disabled={loading}
                 >
-                  {loading ? 'Creating Account...' : 'Sign Up'}
+                  {loading ? t('auth.creatingAccount') : t('auth.signUp')}
                 </Button>
               </form>
             </TabsContent>
@@ -189,7 +195,7 @@ const Auth = () => {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                <span className="bg-background px-2 text-muted-foreground">{t('auth.continueWith')}</span>
               </div>
             </div>
             
@@ -199,7 +205,7 @@ const Auth = () => {
               className="w-full mt-4"
               disabled={loading}
             >
-              {loading ? 'Connecting...' : 'Google'}
+              {loading ? t('auth.connecting') : t('auth.google')}
             </Button>
           </div>
         </CardContent>

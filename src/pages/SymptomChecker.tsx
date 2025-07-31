@@ -9,10 +9,12 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Search, AlertTriangle } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const SymptomChecker = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     abdominalPain: '',
@@ -88,7 +90,7 @@ const SymptomChecker = () => {
                 alt="logo"
               />
             </div>
-            <h1 className="text-xl font-bold text-gray-800">Symptom Checker</h1>
+            <h1 className="text-xl font-bold text-gray-800">{t('symptom.title')}</h1>
           </div>
         </div>
       </header>

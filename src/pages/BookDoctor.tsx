@@ -11,6 +11,7 @@ import { ArrowLeft, Calendar as CalendarIcon, Clock } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
@@ -18,6 +19,7 @@ const BookDoctor = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState('');
@@ -118,7 +120,7 @@ const BookDoctor = () => {
               src="https://i.ibb.co/whR2z9DX/logo1b.png"
               alt="logo"
             />
-            <h1 className="text-xl font-bold text-gray-800">Book Doctor</h1>
+            <h1 className="text-xl font-bold text-gray-800">{t('doctor.title')}</h1>
           </div>
         </div>
       </header>

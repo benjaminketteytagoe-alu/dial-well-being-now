@@ -11,12 +11,14 @@ import Impact from "@/components/Impact";
 import Partners from "@/components/Partners";
 import SymptomChecker from "@/components/SymptomChecker";
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-red-50">
+    <div className="min-h-screen bg-brand-light">
       {/* Navigation Bar */}
       <nav className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-4 py-4">
@@ -33,13 +35,13 @@ const Index = () => {
                 variant="outline"
                 onClick={() => navigate('/auth')}
               >
-                Sign In
+                {t('nav.signIn')}
               </Button>
               <Button 
                 onClick={() => navigate('/auth')}
-                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                className="bg-primary hover:bg-primary/90"
               >
-                Get Started
+                {t('nav.getStarted')}
               </Button>
             </div>
           </div>
