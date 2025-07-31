@@ -63,62 +63,9 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <LanguageProvider>
-          <AuthProvider>
-          <Routes>
-            <Route path="/" element={
-              <PublicRoute>
-                <Index />
-              </PublicRoute>
-            } />
-            <Route path="/auth" element={
-              <PublicRoute>
-                <Auth />
-              </PublicRoute>
-            } />
-            <Route path="/onboarding" element={
-              <PublicRoute>
-                <Onboarding />
-              </PublicRoute>
-            } />
-            <Route path="/home" element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            } />
-            <Route path="/health-info" element={
-              <ProtectedRoute>
-                <HealthInfo />
-              </ProtectedRoute>
-            } />
-            <Route path="/symptom-checker" element={
-              <ProtectedRoute>
-                <SymptomChecker />
-              </ProtectedRoute>
-            } />
-            <Route path="/book-doctor" element={
-              <ProtectedRoute>
-                <BookDoctor />
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-        </LanguageProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <div className="min-h-screen bg-brand-light flex items-center justify-center">
+    <h1 className="text-4xl font-bold text-gray-800">NauriCare is Working!</h1>
+  </div>
 );
 
 export default App;
