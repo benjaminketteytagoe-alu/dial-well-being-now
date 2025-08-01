@@ -1,655 +1,442 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Search, 
-  MapPin, 
-  Star, 
-  Phone, 
-  Calendar, 
-  Clock, 
-  Filter,
-  Heart,
-  ExternalLink,
-  Navigation,
-  Award,
-  Users
-} from "lucide-react";
-import { ReferralRecommendation } from '@/services/aiService';
-import { DatabaseService, DoctorRecord, HospitalRecord } from '@/services/databaseService';
-import { useToast } from '@/hooks/use-toast';
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Phone, Star, Building, User, Calendar } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from '@/contexts/LanguageContext';
 
-interface ReferralEngineProps {
-  initialCondition?: string;
-  onBookingComplete?: (booking: any) => void;
-}
-
-interface Hospital {
+interface Facility {
   id: string;
   name: string;
+  type: 'hospital' | 'clinic';
   location: string;
-  specialties: string[];
+  address: string;
+  phone_number: string;
+  services: string[];
   rating: number;
-  reviewCount: number;
-  facilities: string[];
-  insurance: string[];
-  doctors: Doctor[];
-  contactInfo: {
-    phone: string;
-    email: string;
-    website: string;
-  };
-  availability: {
-    days: string[];
-    hours: string;
-    emergency: boolean;
-  };
 }
 
 interface Doctor {
   id: string;
-  name: string;
-  specialty: string;
-  subSpecialty?: string;
+  full_name: string;
+  specialization_id: string;
+  facility_id: string;
+  years_of_experience: number;
+  consultation_fee: number;
   rating: number;
-  reviewCount: number;
-  experience: string;
-  education: string[];
-  languages: string[];
-  availability: {
-    days: string[];
-    hours: string;
-    nextAvailable: string;
-  };
-  consultationFee: number;
-  hospitalId: string;
+  phone_number: string;
+  email: string;
 }
 
-const ReferralEngine: React.FC<ReferralEngineProps> = ({ initialCondition, onBookingComplete }) => {
-  const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSpecialty, setSelectedSpecialty] = useState('');
+interface Specialization {
+  id: string;
+  name: string;
+  description: string;
+}
+
+const ReferralEngine: React.FC = () => {
+  const [specializations, setSpecializations] = useState<Specialization[]>([]);
+  const [facilities, setFacilities] = useState<Facility[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [selectedSpecialization, setSelectedSpecialization] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
-  const [priceRange, setPriceRange] = useState('');
-  const [availability, setAvailability] = useState('');
-  const [showFavorites, setShowFavorites] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
-  const [bookingStep, setBookingStep] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [doctors, setDoctors] = useState<DoctorRecord[]>([]);
-  const [hospitals, setHospitals] = useState<HospitalRecord[]>([]);
-  const [bookingData, setBookingData] = useState({
-    date: '',
-    time: '',
-    reason: '',
-    notes: ''
-  });
+  const [facilityType, setFacilityType] = useState<'all' | 'hospital' | 'clinic'>('all');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const { t } = useLanguage();
 
-  // Load data from database
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const [doctorsData, hospitalsData] = await Promise.all([
-          DatabaseService.getDoctors(),
-          DatabaseService.getHospitals()
-        ]);
-        setDoctors(doctorsData);
-        setHospitals(hospitalsData);
-      } catch (error) {
-        console.error('Error loading data:', error);
-        toast({
-          title: "Data Loading Error",
-          description: "Failed to load hospital and doctor data.",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetchSpecializations();
+    fetchFacilities();
+  }, []);
 
-    loadData();
-  }, [toast]);
-
-  // Mock data - fallback if database fails
-  const mockHospitals: Hospital[] = [
-    {
-      id: '1',
-      name: "Nairobi Women's Hospital",
-      location: "Nairobi, Kenya",
-      specialties: ["Gynecology", "Obstetrics", "Reproductive Health", "Fertility"],
-      rating: 4.8,
-      reviewCount: 1247,
-      facilities: ["24/7 Emergency", "Laboratory", "Imaging", "Pharmacy"],
-      insurance: ["NHIF", "AAR", "CIC", "Jubilee"],
-      contactInfo: {
-        phone: "+254 20 123 4567",
-        email: "info@nwh.co.ke",
-        website: "www.nwh.co.ke"
-      },
-      availability: {
-        days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-        hours: "8:00 AM - 6:00 PM",
-        emergency: true
-      },
-      doctors: [
-        {
-          id: 'd1',
-          name: "Dr. Sarah Mwangi",
-          specialty: "Gynecologist",
-          subSpecialty: "PCOS Specialist",
-          rating: 4.9,
-          reviewCount: 234,
-          experience: "15+ years",
-          education: ["MBChB - University of Nairobi", "MSc Gynecology - University of London"],
-          languages: ["English", "Swahili", "Kikuyu"],
-          availability: {
-            days: ["Monday", "Wednesday", "Friday"],
-            hours: "9:00 AM - 5:00 PM",
-            nextAvailable: "2024-01-15"
-          },
-          consultationFee: 5000,
-          hospitalId: '1'
-        },
-        {
-          id: 'd2',
-          name: "Dr. James Ochieng",
-          specialty: "Obstetrician",
-          subSpecialty: "High-Risk Pregnancy",
-          rating: 4.7,
-          reviewCount: 189,
-          experience: "12+ years",
-          education: ["MBChB - Moi University", "Fellowship in Maternal-Fetal Medicine"],
-          languages: ["English", "Swahili", "Luo"],
-          availability: {
-            days: ["Tuesday", "Thursday", "Saturday"],
-            hours: "8:00 AM - 4:00 PM",
-            nextAvailable: "2024-01-16"
-          },
-          consultationFee: 6000,
-          hospitalId: '1'
-        }
-      ]
-    },
-    {
-      id: '2',
-      name: "Aga Khan University Hospital",
-      location: "Nairobi, Kenya",
-      specialties: ["Endocrinology", "Gynecology", "Maternal Health", "Fertility"],
-      rating: 4.9,
-      reviewCount: 2156,
-      facilities: ["Research Center", "Advanced Imaging", "Specialized Labs", "Pharmacy"],
-      insurance: ["NHIF", "AAR", "CIC", "Jubilee", "Allianz"],
-      contactInfo: {
-        phone: "+254 20 234 5678",
-        email: "appointments@aku.edu",
-        website: "www.aku.edu"
-      },
-      availability: {
-        days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        hours: "8:00 AM - 5:00 PM",
-        emergency: true
-      },
-      doctors: [
-        {
-          id: 'd3',
-          name: "Dr. Fatima Hassan",
-          specialty: "Endocrinologist",
-          subSpecialty: "PCOS & Diabetes",
-          rating: 4.9,
-          reviewCount: 312,
-          experience: "18+ years",
-          education: ["MBChB - University of Nairobi", "PhD Endocrinology - Harvard"],
-          languages: ["English", "Swahili", "Arabic"],
-          availability: {
-            days: ["Monday", "Wednesday", "Friday"],
-            hours: "9:00 AM - 5:00 PM",
-            nextAvailable: "2024-01-17"
-          },
-          consultationFee: 8000,
-          hospitalId: '2'
-        },
-        {
-          id: 'd4',
-          name: "Dr. Peter Kamau",
-          specialty: "Gynecologist",
-          subSpecialty: "Fibroid Specialist",
-          rating: 4.8,
-          reviewCount: 267,
-          experience: "14+ years",
-          education: ["MBChB - University of Nairobi", "Fellowship in Gynecological Surgery"],
-          languages: ["English", "Swahili", "Kikuyu"],
-          availability: {
-            days: ["Tuesday", "Thursday", "Saturday"],
-            hours: "8:00 AM - 4:00 PM",
-            nextAvailable: "2024-01-18"
-          },
-          consultationFee: 7000,
-          hospitalId: '2'
-        }
-      ]
+  useEffect(() => {
+    if (selectedSpecialization) {
+      fetchDoctors();
     }
-  ];
+  }, [selectedSpecialization, facilityType, selectedLocation]);
 
-  const specialties = [
-    "Gynecology",
-    "Obstetrics", 
-    "Endocrinology",
-    "Reproductive Health",
-    "Fertility",
-    "Maternal Health",
-    "PCOS Specialist",
-    "Fibroid Specialist"
-  ];
-
-  const locations = [
-    "Nairobi, Kenya",
-    "Mombasa, Kenya", 
-    "Kisumu, Kenya",
-    "Nakuru, Kenya",
-    "Eldoret, Kenya"
-  ];
-
-  const priceRanges = [
-    "Under KES 3,000",
-    "KES 3,000 - 5,000", 
-    "KES 5,000 - 8,000",
-    "KES 8,000 - 12,000",
-    "Above KES 12,000"
-  ];
-
-  const availabilityOptions = [
-    "Available this week",
-    "Available next week",
-    "Available this month",
-    "Any availability"
-  ];
-
-  const filteredDoctors = doctors.filter(doctor => {
-    const hospital = hospitals.find(h => h.id === doctor.hospital_id);
-    if (!hospital) return false;
-    
-    const matchesSearch = doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         doctor.specialty.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         hospital.name.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesSpecialty = !selectedSpecialty || doctor.specialty === selectedSpecialty;
-    const matchesLocation = !selectedLocation || hospital.location === selectedLocation;
-    const matchesPrice = !priceRange || getPriceRange(doctor.consultation_fee || 0) === priceRange;
-    
-    return matchesSearch && matchesSpecialty && matchesLocation && matchesPrice;
-  }).map(doctor => ({
-    ...doctor,
-    hospital: hospitals.find(h => h.id === doctor.hospital_id)!
-  }));
-
-  function getPriceRange(fee: number): string {
-    if (fee < 3000) return "Under KES 3,000";
-    if (fee < 5000) return "KES 3,000 - 5,000";
-    if (fee < 8000) return "KES 5,000 - 8,000";
-    if (fee < 12000) return "KES 8,000 - 12,000";
-    return "Above KES 12,000";
-  }
-
-  if (loading) {
-    return (
-      <div className="max-w-6xl mx-auto p-6">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading specialists...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const handleBookAppointment = (doctor: Doctor) => {
-    setSelectedDoctor(doctor);
-    setBookingStep(1);
-  };
-
-  const handleBookingSubmit = async () => {
-    if (!bookingData.date || !bookingData.time || !selectedDoctor) {
-      toast({
-        title: "Missing Information",
-        description: "Please select a date and time for your appointment.",
-        variant: "destructive"
-      });
-      return;
-    }
-
+  const fetchSpecializations = async () => {
     try {
-      const appointment = await DatabaseService.createAppointment({
-        doctor_id: selectedDoctor.id,
-        hospital_id: selectedDoctor.hospitalId,
-        appointment_date: bookingData.date,
-        appointment_time: bookingData.time,
-        reason: bookingData.reason,
-        notes: bookingData.notes
-      });
+      const { data, error } = await supabase
+        .from('specializations')
+        .select('*')
+        .order('name');
 
-      if (appointment) {
-        const booking = {
-          doctor: selectedDoctor,
-          ...bookingData,
-          id: appointment.id,
-          status: 'pending'
-        };
-
-        onBookingComplete?.(booking);
-        
-        toast({
-          title: "Booking Submitted",
-          description: "Your appointment request has been submitted successfully.",
-        });
-
-        // Reset booking state
-        setSelectedDoctor(null);
-        setBookingStep(0);
-        setBookingData({ date: '', time: '', reason: '', notes: '' });
-      } else {
-        throw new Error('Failed to create appointment');
-      }
+      if (error) throw error;
+      setSpecializations(data || []);
     } catch (error) {
-      console.error('Booking error:', error);
+      console.error('Error fetching specializations:', error);
       toast({
-        title: "Booking Error",
-        description: "Failed to submit your appointment request. Please try again.",
-        variant: "destructive"
+        title: "Error",
+        description: "Failed to load specializations",
+        variant: "destructive",
       });
     }
   };
 
-  const renderBookingForm = () => {
-    if (!selectedDoctor) return null;
+  const fetchFacilities = async () => {
+    try {
+      let query = supabase
+        .from('healthcare_facilities')
+        .select('*')
+        .order('rating', { ascending: false });
 
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Book Appointment</CardTitle>
-          <CardDescription>
-            Schedule an appointment with {selectedDoctor.name}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-            <div>
-              <h4 className="font-semibold">{selectedDoctor.name}</h4>
-              <p className="text-sm text-gray-600">{selectedDoctor.specialty}</p>
-              <p className="text-sm text-gray-600">{selectedDoctor.hospital.name}</p>
-            </div>
-            <div className="ml-auto text-right">
-              <p className="font-semibold">KES {selectedDoctor.consultationFee.toLocaleString()}</p>
-              <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                <span className="text-sm">{selectedDoctor.rating}</span>
-              </div>
-            </div>
-          </div>
+      if (facilityType !== 'all') {
+        query = query.eq('type', facilityType);
+      }
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="date">Preferred Date</Label>
-              <Input
-                id="date"
-                type="date"
-                value={bookingData.date}
-                onChange={(e) => setBookingData(prev => ({ ...prev, date: e.target.value }))}
-                min={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-            <div>
-              <Label htmlFor="time">Preferred Time</Label>
-              <Select value={bookingData.time} onValueChange={(value) => setBookingData(prev => ({ ...prev, time: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select time" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="09:00">9:00 AM</SelectItem>
-                  <SelectItem value="10:00">10:00 AM</SelectItem>
-                  <SelectItem value="11:00">11:00 AM</SelectItem>
-                  <SelectItem value="14:00">2:00 PM</SelectItem>
-                  <SelectItem value="15:00">3:00 PM</SelectItem>
-                  <SelectItem value="16:00">4:00 PM</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+      if (selectedLocation) {
+        query = query.ilike('location', `%${selectedLocation}%`);
+      }
 
-          <div>
-            <Label htmlFor="reason">Reason for Visit</Label>
-            <Input
-              id="reason"
-              value={bookingData.reason}
-              onChange={(e) => setBookingData(prev => ({ ...prev, reason: e.target.value }))}
-              placeholder="Brief description of your symptoms or concerns"
-            />
-          </div>
+      const { data, error } = await query;
 
-          <div>
-            <Label htmlFor="notes">Additional Notes (Optional)</Label>
-            <textarea
-              id="notes"
-              className="w-full p-3 border rounded-md"
-              rows={3}
-              value={bookingData.notes}
-              onChange={(e) => setBookingData(prev => ({ ...prev, notes: e.target.value }))}
-              placeholder="Any additional information you'd like to share"
-            />
-          </div>
-
-          <div className="flex gap-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSelectedDoctor(null);
-                setBookingStep(0);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleBookingSubmit}>
-              Book Appointment
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
+      if (error) throw error;
+      setFacilities(data || []);
+    } catch (error) {
+      console.error('Error fetching facilities:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load healthcare facilities",
+        variant: "destructive",
+      });
+    }
   };
 
-  if (bookingStep === 1) {
-    return renderBookingForm();
-  }
+  const fetchDoctors = async () => {
+    setIsLoading(true);
+    try {
+      let query = supabase
+        .from('doctors')
+        .select(`
+          *,
+          specializations (name),
+          healthcare_facilities (name, location, type, address)
+        `)
+        .order('rating', { ascending: false });
+
+      if (selectedSpecialization) {
+        query = query.eq('specialization_id', selectedSpecialization);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      
+      let filteredDoctors = data || [];
+
+      // Filter by facility type and location if specified
+      if (facilityType !== 'all' || selectedLocation) {
+        filteredDoctors = filteredDoctors.filter(doctor => {
+          const facility = doctor.healthcare_facilities;
+          if (!facility) return false;
+          
+          if (facilityType !== 'all' && facility.type !== facilityType) {
+            return false;
+          }
+          
+          if (selectedLocation && !facility.location.toLowerCase().includes(selectedLocation.toLowerCase())) {
+            return false;
+          }
+          
+          return true;
+        });
+      }
+
+      setDoctors(filteredDoctors);
+    } catch (error) {
+      console.error('Error fetching doctors:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load doctors",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreateReferral = async (doctorId: string, facilityId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to create a referral",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('referrals')
+        .insert({
+          user_id: user.id,
+          symptom_analysis: {
+            specialization: selectedSpecialization,
+            location: selectedLocation,
+            created_at: new Date().toISOString()
+          },
+          recommended_specialization: specializations.find(s => s.id === selectedSpecialization)?.name || '',
+          facility_id: facilityId,
+          doctor_id: doctorId,
+          status: 'pending'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Referral Created",
+        description: "Your referral has been created successfully. The facility will contact you soon.",
+      });
+
+    } catch (error) {
+      console.error('Error creating referral:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create referral",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star 
+        key={i} 
+        className={`h-4 w-4 ${i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+      />
+    ));
+  };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-2">
-          <Navigation className="w-8 h-8 text-blue-600" />
-          Find Specialists
-        </h2>
-        <p className="text-gray-600">
-          Connect with top specialists for {initialCondition || 'your health condition'}
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
+      <div className="text-center space-y-4">
+        <h1 className="text-4xl font-bold text-brand-dark">Healthcare Referral Engine</h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Find specialized healthcare facilities and doctors for your specific needs
         </p>
       </div>
 
-      {/* Search and Filters */}
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <Label htmlFor="search">Search</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  id="search"
-                  placeholder="Search doctors, hospitals..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <Label htmlFor="specialty">Specialty</Label>
-              <Select value={selectedSpecialty} onValueChange={setSelectedSpecialty}>
+      <Card className="border-brand-accent/20">
+        <CardHeader>
+          <CardTitle>Search Criteria</CardTitle>
+          <CardDescription>
+            Filter healthcare providers by specialization, location, and facility type
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Specialization</Label>
+              <Select value={selectedSpecialization} onValueChange={setSelectedSpecialization}>
                 <SelectTrigger>
-                  <SelectValue placeholder="All specialties" />
+                  <SelectValue placeholder="Select specialization" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All specialties</SelectItem>
-                  {specialties.map(specialty => (
-                    <SelectItem key={specialty} value={specialty}>{specialty}</SelectItem>
+                  {specializations.map((spec) => (
+                    <SelectItem key={spec.id} value={spec.id}>
+                      {spec.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            
-            <div>
-              <Label htmlFor="location">Location</Label>
-              <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All locations" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All locations</SelectItem>
-                  {locations.map(location => (
-                    <SelectItem key={location} value={location}>{location}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+
+            <div className="space-y-2">
+              <Label>Location</Label>
+              <Input
+                placeholder="Enter city or area"
+                value={selectedLocation}
+                onChange={(e) => setSelectedLocation(e.target.value)}
+              />
             </div>
-            
-            <div>
-              <Label htmlFor="price">Price Range</Label>
-              <Select value={priceRange} onValueChange={setPriceRange}>
+
+            <div className="space-y-2">
+              <Label>Facility Type</Label>
+              <Select value={facilityType} onValueChange={(value: 'all' | 'hospital' | 'clinic') => setFacilityType(value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Any price" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any price</SelectItem>
-                  {priceRanges.map(range => (
-                    <SelectItem key={range} value={range}>{range}</SelectItem>
-                  ))}
+                  <SelectItem value="all">All Facilities</SelectItem>
+                  <SelectItem value="hospital">Hospitals</SelectItem>
+                  <SelectItem value="clinic">Clinics</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
+
+          <Button 
+            onClick={() => { fetchFacilities(); fetchDoctors(); }}
+            className="w-full bg-brand-primary hover:bg-brand-secondary text-white"
+          >
+            Search Healthcare Providers
+          </Button>
         </CardContent>
       </Card>
 
-      {/* Results */}
-      <div className="space-y-4">
-        {filteredDoctors.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <p className="text-gray-500">No doctors found matching your criteria.</p>
-              <Button 
-                variant="outline" 
-                className="mt-4"
-                onClick={() => {
-                  setSearchQuery('');
-                  setSelectedSpecialty('');
-                  setSelectedLocation('');
-                  setPriceRange('');
-                }}
-              >
-                Clear Filters
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredDoctors.map((doctor) => (
-            <Card key={doctor.id} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-semibold">{doctor.name}</h3>
-                      <Badge variant="secondary">{doctor.specialty}</Badge>
-                      {doctor.sub_specialty && (
-                        <Badge variant="outline">{doctor.sub_specialty}</Badge>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        {doctor.hospital.name}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                        {doctor.rating} ({doctor.review_count} reviews)
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Award className="w-4 h-4" />
-                        {doctor.experience}
-                      </span>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <h4 className="font-semibold mb-1">Education</h4>
-                        <ul className="text-sm text-gray-600 space-y-1">
-                          {doctor.education.map((edu, index) => (
-                            <li key={index}>{edu}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold mb-1">Languages</h4>
-                        <div className="flex flex-wrap gap-1">
-                          {doctor.languages.map((lang, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {lang}
-                            </Badge>
-                          ))}
+      {isLoading && (
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Loading healthcare providers...</p>
+        </div>
+      )}
+
+      {/* Healthcare Facilities */}
+      {facilities.length > 0 && (
+        <Card className="border-brand-accent/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building className="h-5 w-5 text-brand-primary" />
+              Healthcare Facilities ({facilities.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-4">
+              {facilities.map((facility) => (
+                <Card key={facility.id} className="border border-gray-200">
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="font-semibold text-brand-dark">{facility.name}</h3>
+                          <Badge variant={facility.type === 'hospital' ? 'default' : 'secondary'}>
+                            {facility.type.charAt(0).toUpperCase() + facility.type.slice(1)}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {renderStars(Math.round(facility.rating))}
+                          <span className="text-sm text-muted-foreground ml-1">
+                            ({facility.rating.toFixed(1)})
+                          </span>
                         </div>
                       </div>
+                      
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-brand-primary" />
+                          <span>{facility.address || facility.location}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-brand-primary" />
+                          <span>{facility.phone_number}</span>
+                        </div>
+                      </div>
+
+                      {facility.services.length > 0 && (
+                        <div className="space-y-2">
+                          <Label className="text-xs">Services:</Label>
+                          <div className="flex flex-wrap gap-1">
+                            {facility.services.slice(0, 3).map((service, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {service}
+                              </Badge>
+                            ))}
+                            {facility.services.length > 3 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{facility.services.length - 3} more
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    
-                                         <div className="flex items-center gap-4 text-sm">
-                       <span className="flex items-center gap-1">
-                         <Calendar className="w-4 h-4" />
-                         {doctor.availability_days.join(', ')}
-                       </span>
-                       <span className="flex items-center gap-1">
-                         <Clock className="w-4 h-4" />
-                         {doctor.availability_hours}
-                       </span>
-                       <span className="font-semibold text-green-600">
-                         KES {(doctor.consultation_fee || 0).toLocaleString()}
-                       </span>
-                     </div>
-                  </div>
-                  
-                  <div className="ml-6 flex flex-col gap-2">
-                    <Button onClick={() => handleBookAppointment(doctor)}>
-                      Book Appointment
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Phone className="w-4 h-4 mr-2" />
-                      Call
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Profile
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Doctors */}
+      {doctors.length > 0 && (
+        <Card className="border-brand-accent/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5 text-brand-primary" />
+              Available Doctors ({doctors.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {doctors.map((doctor) => (
+                <Card key={doctor.id} className="border border-gray-200">
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <div className="text-center space-y-2">
+                        <h3 className="font-semibold text-brand-dark">{doctor.full_name}</h3>
+                        <Badge className="bg-brand-light text-brand-dark">
+                          {doctor.specializations?.name}
+                        </Badge>
+                        <div className="flex items-center justify-center gap-1">
+                          {renderStars(Math.round(doctor.rating))}
+                          <span className="text-sm text-muted-foreground ml-1">
+                            ({doctor.rating.toFixed(1)})
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Building className="h-4 w-4 text-brand-primary" />
+                          <span className="truncate">{doctor.healthcare_facilities?.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-brand-primary" />
+                          <span>{doctor.healthcare_facilities?.location}</span>
+                        </div>
+                        {doctor.years_of_experience && (
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-brand-primary" />
+                            <span>{doctor.years_of_experience} years experience</span>
+                          </div>
+                        )}
+                        {doctor.consultation_fee && (
+                          <div className="text-center">
+                            <span className="font-medium text-brand-primary">
+                              KSh {doctor.consultation_fee.toLocaleString()}
+                            </span>
+                            <span className="text-muted-foreground"> consultation</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <Button 
+                        onClick={() => handleCreateReferral(doctor.id, doctor.facility_id)}
+                        className="w-full bg-brand-primary hover:bg-brand-secondary text-white"
+                        size="sm"
+                      >
+                        Book Consultation
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {!isLoading && selectedSpecialization && doctors.length === 0 && (
+        <Card className="border-brand-accent/20">
+          <CardContent className="text-center py-8">
+            <p className="text-muted-foreground">
+              No doctors found for the selected criteria. Try adjusting your search filters.
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
 
-export default ReferralEngine; 
+export default ReferralEngine;
