@@ -15,6 +15,8 @@ import Home from "./pages/Home";
 import HealthInfo from "./pages/HealthInfo";
 import SymptomChecker from "./pages/SymptomChecker";
 import BookDoctor from "./pages/BookDoctor";
+import Teleconsultation from "./pages/Teleconsultation";
+import TeleconsultationSession from "./components/TeleconsultationSession";
 
 const queryClient = new QueryClient();
 
@@ -63,9 +65,31 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => (
-  <div className="min-h-screen bg-brand-light flex items-center justify-center">
-    <h1 className="text-4xl font-bold text-gray-800">NauriCare is Working!</h1>
-  </div>
+  <QueryClientProvider client={queryClient}>
+    <LanguageProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <TooltipProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
+              <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/health-info" element={<ProtectedRoute><HealthInfo /></ProtectedRoute>} />
+              <Route path="/symptom-checker" element={<ProtectedRoute><SymptomChecker /></ProtectedRoute>} />
+              <Route path="/book-doctor" element={<ProtectedRoute><BookDoctor /></ProtectedRoute>} />
+              <Route path="/teleconsultation" element={<ProtectedRoute><Teleconsultation /></ProtectedRoute>} />
+              <Route path="/teleconsultation/session/:sessionId" element={<ProtectedRoute><TeleconsultationSession /></ProtectedRoute>} />
+              <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Toaster />
+            <Sonner />
+          </TooltipProvider>
+        </BrowserRouter>
+      </AuthProvider>
+    </LanguageProvider>
+  </QueryClientProvider>
 );
 
 export default App;
