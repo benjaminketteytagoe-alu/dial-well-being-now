@@ -1,11 +1,14 @@
 import OpenAI from 'openai';
 
 // Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY || '',
-  dangerouslyAllowBrowser: true // Note: In production, this should be handled server-side
-});
-
+// 🛑 Do **not** initialise the OpenAI SDK in client code.
+// Instead, create a small edge/serverless function (e.g. `/api/ai`) that:
+//   1. Reads the key from a secure server-side env var.
+//   2. Proxies the request (or implements a thin wrapper) to OpenAI.
+//   3. Returns the response to the client.
+//
+// If you need a quick fix before refactor:
+//   throw new Error if the env var is missing to avoid leaking an empty-key request.
 export interface SymptomData {
   symptoms: string[];
   age: number;

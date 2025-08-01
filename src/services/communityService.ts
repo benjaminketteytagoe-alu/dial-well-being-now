@@ -141,10 +141,15 @@ export class CommunityService {
     forumId: string,
     title: string,
     content: string,
-    postType: string = 'discussion',
+    postType: 'discussion' | 'question' | 'experience' | 'resource' | 'announcement' = 'discussion',
     isAnonymous: boolean = false
   ): Promise<ForumPost> {
     try {
+      // Validate inputs
+      if (!title.trim()) throw new Error('Title is required');
+      if (!content.trim()) throw new Error('Content is required');
+      if (title.length > 200) throw new Error('Title too long');
+
       const { data: post, error } = await supabase
         .from('forum_posts')
         .insert({
@@ -165,7 +170,6 @@ export class CommunityService {
       throw error;
     }
   }
-
   // Get forum replies
   static async getForumReplies(postId: string): Promise<ForumReply[]> {
     try {
@@ -187,10 +191,6 @@ export class CommunityService {
       return replies || [];
     } catch (error) {
       console.error('Error getting forum replies:', error);
-      throw error;
-    }
-  }
-
   // Create a forum reply
   static async createForumReply(
     userId: string,
@@ -199,6 +199,9 @@ export class CommunityService {
     isAnonymous: boolean = false
   ): Promise<ForumReply> {
     try {
+      // Validate input
+      if (!content.trim()) throw new Error('Content is required');
+
       const { data: reply, error } = await supabase
         .from('forum_replies')
         .insert({
@@ -213,37 +216,69 @@ export class CommunityService {
       if (error) throw error;
 
       // Update reply count on the post
-      await supabase.rpc('increment_reply_count', { post_id: postId });
+      try {
+        await supabase.rpc('increment_reply_count', { post_id: postId });
+      } catch (rpcError) {
+        // Attempt to rollback by deleting the reply
+        await supabase
+          .from('forum_replies')
+          .delete()
+          .eq('id', reply.id);
+        throw rpcError;
+      }
 
       return reply;
     } catch (error) {
       console.error('Error creating forum reply:', error);
       throw error;
     }
-  }
-
-  // Get mentorship programs
-  static async getMentorshipPrograms(): Promise<MentorshipProgram[]> {
-    try {
-      const { data: programs, error } = await supabase
-        .from('mentorship_programs')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return programs || [];
-    } catch (error) {
-      console.error('Error getting mentorship programs:', error);
+  }      console.error('Error creating forum reply:', error);
       throw error;
     }
   }
 
+  // Get mentorship programs
+  static async getMentorshipPrograms(): Promise<MentorshipProgram[]> {
   // Join a mentorship program
   static async joinMentorshipProgram(userId: string, programId: string): Promise<void> {
     try {
+      // Check if already enrolled
+      const { data: existing } = await supabase
+        .from('mentorship_participants')
+        .select('id')
+        .eq('program_id', programId)
+        .eq('user_id', userId)
+        .single();
+      
+      if (existing) throw new Error('Already enrolled in this program');
+      
+      // Check capacity
+      const { data: program } = await supabase
+        .from('mentorship_programs')
+        .select('max_participants, current_participants')
+        .eq('id', programId)
+        .single();
+      
+      if (program && program.current_participants >= program.max_participants) {
+        throw new Error('Program is full');
+      }
+      
       const { error } = await supabase
         .from('mentorship_participants')
+        .insert({
+          program_id: programId,
+          user_id: userId
+        });
+
+      if (error) throw error;
+
+      // Update participant count
+      await supabase.rpc('increment_participant_count', { program_id: programId });
+    } catch (error) {
+      console.error('Error joining mentorship program:', error);
+      throw error;
+    }
+  }        .from('mentorship_participants')
         .insert({
           program_id: programId,
           user_id: userId
@@ -272,20 +307,38 @@ export class CommunityService {
       return sessions || [];
     } catch (error) {
       console.error('Error getting coaching sessions:', error);
-      throw error;
-    }
-  }
-
   // Book a coaching session
   static async bookCoachingSession(
     userId: string,
-    sessionType: string,
+    sessionType: 'nutrition' | 'exercise' | 'mental_health' | 'lifestyle' | 'stress_management',
     sessionDate: string,
     sessionTime: string,
     durationMinutes: number = 60,
     goals?: string
   ): Promise<CoachingSession> {
     try {
+      // Validate date is in the future
+      const sessionDateTime = new Date(`${sessionDate}T${sessionTime}`);
+      if (sessionDateTime <= new Date()) {
+        throw new Error('Session must be scheduled in the future');
+      }
+
+  static async searchCommunity(query: string): Promise<{ forums: CommunityForum[], posts: ForumPost[] }> {
+    try {
+      // Sanitize query to prevent SQL injection
+      const sanitizedQuery = query.replace(/[%_]/g, '\\      // Check for conflicts
+      const { data: conflicts } = await supabase
+        .from('coaching_sessions')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('session_date', sessionDate)
+        .eq('session_time', sessionTime)
+        .eq('status', 'scheduled');
+
+      if (conflicts && conflicts.length > 0) {
+        throw new Error('Time slot already booked');
+      }
+
       const { data: session, error } = await supabase
         .from('coaching_sessions')
         .insert({
@@ -305,9 +358,46 @@ export class CommunityService {
       console.error('Error booking coaching session:', error);
       throw error;
     }
+  }      console.error('Error booking coaching session:', error);
+      throw error;
+    }
   }
 
-  // Like a post or reply
+');
+
+      // Parallel search
+      const [forumsResult, postsResult] = await Promise.all([
+        supabase
+          .from('community_forums')
+          .select('*')
+          .or(`name.ilike.%${sanitizedQuery}%,description.ilike.%${sanitizedQuery}%`)
+          .eq('is_active', true),
+        supabase
+          .from('forum_posts')
+          .select(`
+            *,
+            user:user_id (
+              id,
+              email,
+              user_metadata
+            )
+          `)
+          .or(`title.ilike.%${sanitizedQuery}%,content.ilike.%${sanitizedQuery}%`)
+          .eq('is_approved', true)
+      ]);
+
+      if (forumsResult.error) throw forumsResult.error;
+      if (postsResult.error) throw postsResult.error;
+
+      return {
+        forums: forumsResult.data || [],
+        posts: postsResult.data || []
+      };
+    } catch (error) {
+      console.error('Error searching community:', error);
+      throw error;
+    }
+  }  // Like a post or reply
   static async likeContent(contentType: 'post' | 'reply', contentId: string): Promise<void> {
     try {
       const table = contentType === 'post' ? 'forum_posts' : 'forum_replies';

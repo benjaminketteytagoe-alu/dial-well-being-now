@@ -17,6 +17,8 @@ import SymptomChecker from "./pages/SymptomChecker";
 import BookDoctor from "./pages/BookDoctor";
 import Teleconsultation from "./pages/Teleconsultation";
 import TeleconsultationSession from "./components/TeleconsultationSession";
+import Community from "./pages/Community";
+import ForumDetail from "./pages/ForumDetail";
 
 const queryClient = new QueryClient();
 
@@ -24,7 +26,7 @@ const queryClient = new QueryClient();
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-      if (loading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-brand-light flex items-center justify-center">
         <div className="text-center">
@@ -46,7 +48,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-      if (loading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-brand-light flex items-center justify-center">
         <div className="text-center">
@@ -80,6 +82,8 @@ const App = () => (
               <Route path="/book-doctor" element={<ProtectedRoute><BookDoctor /></ProtectedRoute>} />
               <Route path="/teleconsultation" element={<ProtectedRoute><Teleconsultation /></ProtectedRoute>} />
               <Route path="/teleconsultation/session/:sessionId" element={<ProtectedRoute><TeleconsultationSession /></ProtectedRoute>} />
+              <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
+              <Route path="/community/forum/:forumId" element={<ProtectedRoute><ForumDetail /></ProtectedRoute>} />
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>

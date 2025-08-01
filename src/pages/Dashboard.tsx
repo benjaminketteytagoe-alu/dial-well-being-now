@@ -10,6 +10,7 @@ import RecentActivities from "@/components/dashboard/RecentActivities";
 import UpcomingAppointments from "@/components/dashboard/UpcomingAppointments";
 import QuickActions from "@/components/dashboard/QuickActions";
 import HealthTips from "@/components/dashboard/HealthTips";
+import UserAnalytics from "@/components/dashboard/UserAnalytics";
 
 const Dashboard = () => {
   return (
@@ -18,8 +19,9 @@ const Dashboard = () => {
       
       <div className="container mx-auto px-4 py-6 space-y-6">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="health">Health</TabsTrigger>
             <TabsTrigger value="activities">Activities</TabsTrigger>
           </TabsList>
@@ -38,6 +40,10 @@ const Dashboard = () => {
               <UpcomingAppointments />
               <HealthTips />
             </div>
+          </TabsContent>
+          
+          <TabsContent value="analytics" className="space-y-6">
+            <UserAnalytics />
           </TabsContent>
           
           <TabsContent value="health" className="space-y-6">

@@ -15,7 +15,9 @@ import {
   Clock, 
   ArrowLeft,
   Send,
-  MoreHorizontal
+  MoreHorizontal,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -36,6 +38,7 @@ const ForumDetail = () => {
   const [replies, setReplies] = useState<ForumReply[]>([]);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showReplyDialog, setShowReplyDialog] = useState(false);
+  const [showPostDetail, setShowPostDetail] = useState(false);
   const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostContent, setNewPostContent] = useState('');
   const [newReplyContent, setNewReplyContent] = useState('');
@@ -176,6 +179,12 @@ const ForumDetail = () => {
   const handleViewPost = async (post: ForumPost) => {
     setSelectedPost(post);
     await loadPostReplies(post.id);
+    setShowPostDetail(true);
+  };
+
+  const handleReplyToPost = (post: ForumPost) => {
+    setSelectedPost(post);
+    setShowReplyDialog(true);
   };
 
   if (loading) {
@@ -349,6 +358,13 @@ const ForumDetail = () => {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => handleReplyToPost(post)}
+                        >
+                          Reply
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                         >
                           <Eye className="w-4 h-4 mr-1" />
                           {post.views_count}
@@ -361,6 +377,53 @@ const ForumDetail = () => {
             </Card>
           ))}
         </div>
+
+        {/* Post Detail Dialog */}
+        <Dialog open={showPostDetail} onOpenChange={setShowPostDetail}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{selectedPost?.title}</DialogTitle>
+            </DialogHeader>
+            {selectedPost && (
+              <div className="space-y-6">
+                {/* Original Post */}
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <User className="w-4 h-4" />
+                      <span className="font-medium">
+                        {selectedPost.is_anonymous ? 'Anonymous' : selectedPost.user?.user_metadata?.full_name || 'User'}
+                      </span>
+                      <span className="text-gray-500">•</span>
+                      <span className="text-gray-500">{format(new Date(selectedPost.created_at), 'MMM d, yyyy')}</span>
+                    </div>
+                    <p className="text-gray-700">{selectedPost.content}</p>
+                  </CardContent>
+                </Card>
+
+                {/* Replies */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Replies ({replies.length})</h3>
+                  {replies.map((reply) => (
+                    <Card key={reply.id}>
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <User className="w-4 h-4" />
+                          <span className="font-medium">
+                            {reply.is_anonymous ? 'Anonymous' : reply.user?.user_metadata?.full_name || 'User'}
+                          </span>
+                          <span className="text-gray-500">•</span>
+                          <span className="text-gray-500">{format(new Date(reply.created_at), 'MMM d, yyyy')}</span>
+                        </div>
+                        <p className="text-gray-700">{reply.content}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Reply Dialog */}
         <Dialog open={showReplyDialog} onOpenChange={setShowReplyDialog}>
