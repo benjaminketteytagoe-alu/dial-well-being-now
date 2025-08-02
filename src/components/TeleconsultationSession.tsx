@@ -238,19 +238,15 @@ const TeleconsultationSessionComponent: React.FC<TeleconsultationSessionProps> =
             </Button>
             <div>
               <h1 className="text-lg font-semibold">
-
                 {session.doctor?.name || 'Unknown Doctor'}
               </h1>
               <p className="text-sm text-gray-400">
                 {session.doctor?.specialty || 'General'} • {session.session_type} consultation
-
                 Dr. Sarah Mwangi
-              </h1>
+              </p>
               <p className="text-sm text-gray-400">
                 Gynecologist • {session.session_type} consultation
-13d9f2ce17db08744c3c68cd476ee9e08750794b
               </p>
-            </div>
             </div>
           </div>
           <div className="flex items-center space-x-4">
