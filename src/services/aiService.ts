@@ -1,14 +1,5 @@
-import OpenAI from 'openai';
+import { supabase } from '@/integrations/supabase/client';
 
-// Initialize OpenAI client
-// 🛑 Do **not** initialise the OpenAI SDK in client code.
-// Instead, create a small edge/serverless function (e.g. `/api/ai`) that:
-//   1. Reads the key from a secure server-side env var.
-//   2. Proxies the request (or implements a thin wrapper) to OpenAI.
-//   3. Returns the response to the client.
-//
-// If you need a quick fix before refactor:
-//   throw new Error if the env var is missing to avoid leaking an empty-key request.
 export interface SymptomData {
   symptoms: string[];
   age: number;
@@ -75,72 +66,34 @@ const mockHospitals = [
 export class AISymptomChecker {
   private static async analyzeSymptomsWithAI(symptomData: SymptomData): Promise<AIAnalysisResult> {
     try {
-      const prompt = this.buildAnalysisPrompt(symptomData);
-      
-      const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: `You are a specialized AI health assistant focusing on women's health, particularly PCOS, fibroids, and maternal health. 
-            Provide accurate, empathetic, and actionable health insights. Always recommend consulting healthcare professionals for proper diagnosis.
-            Respond in JSON format with the following structure:
-            {
-              "condition": "string",
-              "confidence": number (0-1),
-              "riskLevel": "low|medium|high",
-              "recommendations": ["string array"],
-              "urgency": "routine|soon|immediate",
-              "explanation": "string",
-              "nextSteps": ["string array"]
-            }`
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 1000
+      // Use Supabase Edge Function for AI analysis
+      const { data, error } = await supabase.functions.invoke('ai-symptom-analysis', {
+        body: {
+          symptoms: symptomData.symptoms.join(', '),
+          age: symptomData.age,
+          medicalHistory: symptomData.medicalHistory.join(', '),
+          currentMedications: symptomData.currentMedications.join(', ')
+        }
       });
 
-      const response = completion.choices[0]?.message?.content;
-      if (!response) {
-        throw new Error('No response from AI');
-      }
-
-      return JSON.parse(response);
+      if (error) throw error;
+      
+      return {
+        condition: data.potentialConditions?.[0] || 'General Health Concern',
+        confidence: 0.8,
+        riskLevel: data.riskAssessment === 'High' ? 'high' : data.riskAssessment === 'Low' ? 'low' : 'medium',
+        recommendations: data.recommendations || [],
+        urgency: data.urgency === 'Urgent' ? 'immediate' : data.urgency === 'Soon' ? 'soon' : 'routine',
+        explanation: data.keyFindings?.join('. ') || 'Analysis completed',
+        nextSteps: data.recommendations || []
+      };
     } catch (error) {
       console.error('AI analysis error:', error);
-      // Fallback to rule-based analysis
       return this.fallbackAnalysis(symptomData);
     }
   }
 
-  private static buildAnalysisPrompt(symptomData: SymptomData): string {
-    return `
-    Analyze the following symptoms for potential PCOS, fibroids, or maternal health conditions:
-
-    Symptoms: ${symptomData.symptoms.join(', ')}
-    Age: ${symptomData.age}
-    Medical History: ${symptomData.medicalHistory.join(', ')}
-    Current Medications: ${symptomData.currentMedications.join(', ')}
-    Family History: ${symptomData.familyHistory.join(', ')}
-    Lifestyle Factors: ${symptomData.lifestyleFactors.join(', ')}
-    Severity: ${symptomData.severity}/10
-    Duration: ${symptomData.duration}
-
-    Focus on:
-    1. PCOS indicators: irregular periods, weight gain, acne, hair growth
-    2. Fibroid indicators: heavy bleeding, pelvic pain, frequent urination
-    3. Maternal health concerns: pregnancy-related symptoms, fertility issues
-
-    Provide a comprehensive analysis with actionable recommendations.
-    `;
-  }
-
   private static fallbackAnalysis(symptomData: SymptomData): AIAnalysisResult {
-    // Rule-based fallback analysis
     const symptoms = symptomData.symptoms.map(s => s.toLowerCase());
     
     let condition = "General Health Concern";
@@ -230,15 +183,14 @@ export class AISymptomChecker {
           location: hospital.location,
           rating: doctor.rating,
           availability: doctor.availability,
-          contactInfo: `+254 XXX XXX XXX`, // Mock contact
+          contactInfo: `+254 XXX XXX XXX`,
           reason: `Specialized in ${doctor.specialty} and highly rated for ${analysis.condition.toLowerCase()} treatment`
         });
       });
     });
 
-    // Sort by rating and return top 3
     return recommendations
       .sort((a, b) => b.rating - a.rating)
       .slice(0, 3);
   }
-} 
+}
