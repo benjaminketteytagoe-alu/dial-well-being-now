@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export interface TeleconsultationSession {
+  doctor: any;
   id: string;
   user_id: string;
   doctor_id: string;

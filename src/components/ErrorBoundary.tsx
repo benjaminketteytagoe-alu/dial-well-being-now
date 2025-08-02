@@ -1,0 +1,1 @@
+// Create error boundary component 

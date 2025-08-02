@@ -5,7 +5,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
-  Video, 
   VideoOff, 
   Mic, 
   MicOff, 
@@ -22,7 +21,7 @@ import {
   Volume2,
   VolumeX
 } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { TeleconsultationService, TeleconsultationSession } from '@/services/teleconsultationService';
@@ -239,11 +238,12 @@ const TeleconsultationSessionComponent: React.FC<TeleconsultationSessionProps> =
             </Button>
             <div>
               <h1 className="text-lg font-semibold">
-                {session.doctors?.name || 'Unknown Doctor'}
+                {session.doctor?.name || 'Unknown Doctor'}
               </h1>
               <p className="text-sm text-gray-400">
-                {session.doctors?.specialty || 'General'} • {session.session_type} consultation
+                {session.doctor?.specialty || 'General'} • {session.session_type} consultation
               </p>
+            </div>
             </div>
           </div>
           <div className="flex items-center space-x-4">
