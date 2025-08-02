@@ -170,6 +170,7 @@ export class CommunityService {
       throw error;
     }
   }
+
   // Get forum replies
   static async getForumReplies(postId: string): Promise<ForumReply[]> {
     try {
@@ -191,6 +192,10 @@ export class CommunityService {
       return replies || [];
     } catch (error) {
       console.error('Error getting forum replies:', error);
+      throw error;
+    }
+  }
+
   // Create a forum reply
   static async createForumReply(
     userId: string,
@@ -232,13 +237,25 @@ export class CommunityService {
       console.error('Error creating forum reply:', error);
       throw error;
     }
-  }      console.error('Error creating forum reply:', error);
-      throw error;
-    }
   }
 
   // Get mentorship programs
   static async getMentorshipPrograms(): Promise<MentorshipProgram[]> {
+    try {
+      const { data: programs, error } = await supabase
+        .from('mentorship_programs')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return programs || [];
+    } catch (error) {
+      console.error('Error getting mentorship programs:', error);
+      throw error;
+    }
+  }
+
   // Join a mentorship program
   static async joinMentorshipProgram(userId: string, programId: string): Promise<void> {
     try {
@@ -278,20 +295,6 @@ export class CommunityService {
       console.error('Error joining mentorship program:', error);
       throw error;
     }
-  }        .from('mentorship_participants')
-        .insert({
-          program_id: programId,
-          user_id: userId
-        });
-
-      if (error) throw error;
-
-      // Update participant count
-      await supabase.rpc('increment_participant_count', { program_id: programId });
-    } catch (error) {
-      console.error('Error joining mentorship program:', error);
-      throw error;
-    }
   }
 
   // Get user's coaching sessions
@@ -307,6 +310,10 @@ export class CommunityService {
       return sessions || [];
     } catch (error) {
       console.error('Error getting coaching sessions:', error);
+      throw error;
+    }
+  }
+
   // Book a coaching session
   static async bookCoachingSession(
     userId: string,
@@ -323,10 +330,7 @@ export class CommunityService {
         throw new Error('Session must be scheduled in the future');
       }
 
-  static async searchCommunity(query: string): Promise<{ forums: CommunityForum[], posts: ForumPost[] }> {
-    try {
-      // Sanitize query to prevent SQL injection
-      const sanitizedQuery = query.replace(/[%_]/g, '\\      // Check for conflicts
+      // Check for conflicts
       const { data: conflicts } = await supabase
         .from('coaching_sessions')
         .select('id')
@@ -358,12 +362,29 @@ export class CommunityService {
       console.error('Error booking coaching session:', error);
       throw error;
     }
-  }      console.error('Error booking coaching session:', error);
+  }
+
+  // Like a post or reply
+  static async likeContent(contentType: 'post' | 'reply', contentId: string): Promise<void> {
+    try {
+      const table = contentType === 'post' ? 'forum_posts' : 'forum_replies';
+      const { error } = await supabase.rpc('increment_likes', { 
+        table_name: table, 
+        content_id: contentId 
+      });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error liking content:', error);
       throw error;
     }
   }
 
-');
+  // Search forums and posts
+  static async searchCommunity(query: string): Promise<{ forums: CommunityForum[], posts: ForumPost[] }> {
+    try {
+      // Sanitize query to prevent SQL injection
+      const sanitizedQuery = query.replace(/[%_]/g, '\\$&');
 
       // Parallel search
       const [forumsResult, postsResult] = await Promise.all([
@@ -397,57 +418,5 @@ export class CommunityService {
       console.error('Error searching community:', error);
       throw error;
     }
-  }  // Like a post or reply
-  static async likeContent(contentType: 'post' | 'reply', contentId: string): Promise<void> {
-    try {
-      const table = contentType === 'post' ? 'forum_posts' : 'forum_replies';
-      const { error } = await supabase.rpc('increment_likes', { 
-        table_name: table, 
-        content_id: contentId 
-      });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error liking content:', error);
-      throw error;
-    }
   }
-
-  // Search forums and posts
-  static async searchCommunity(query: string): Promise<{ forums: CommunityForum[], posts: ForumPost[] }> {
-    try {
-      // Search forums
-      const { data: forums, error: forumsError } = await supabase
-        .from('community_forums')
-        .select('*')
-        .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
-        .eq('is_active', true);
-
-      if (forumsError) throw forumsError;
-
-      // Search posts
-      const { data: posts, error: postsError } = await supabase
-        .from('forum_posts')
-        .select(`
-          *,
-          user:user_id (
-            id,
-            email,
-            user_metadata
-          )
-        `)
-        .or(`title.ilike.%${query}%,content.ilike.%${query}%`)
-        .eq('is_approved', true);
-
-      if (postsError) throw postsError;
-
-      return {
-        forums: forums || [],
-        posts: posts || []
-      };
-    } catch (error) {
-      console.error('Error searching community:', error);
-      throw error;
-    }
-  }
-} 
+}
