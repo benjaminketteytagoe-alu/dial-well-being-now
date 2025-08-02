@@ -98,7 +98,10 @@ const ReferralEngine: React.FC = () => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setFacilities(data || []);
+      setFacilities((data || []).map((facility: any) => ({
+        ...facility,
+        type: facility.type as 'hospital' | 'clinic'
+      })));
     } catch (error) {
       console.error('Error fetching facilities:', error);
       toast({
@@ -375,7 +378,7 @@ const ReferralEngine: React.FC = () => {
                       <div className="text-center space-y-2">
                         <h3 className="font-semibold text-brand-dark">{doctor.full_name}</h3>
                         <Badge className="bg-brand-light text-brand-dark">
-                          {doctor.specializations?.name}
+                          {doctor.specialization_id || 'General'}
                         </Badge>
                         <div className="flex items-center justify-center gap-1">
                           {renderStars(Math.round(doctor.rating))}
@@ -388,11 +391,11 @@ const ReferralEngine: React.FC = () => {
                       <div className="space-y-2 text-sm">
                         <div className="flex items-center gap-2">
                           <Building className="h-4 w-4 text-brand-primary" />
-                          <span className="truncate">{doctor.healthcare_facilities?.name}</span>
+                          <span className="truncate">Healthcare Facility</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-brand-primary" />
-                          <span>{doctor.healthcare_facilities?.location}</span>
+                          <span>Location</span>
                         </div>
                         {doctor.years_of_experience && (
                           <div className="flex items-center gap-2">

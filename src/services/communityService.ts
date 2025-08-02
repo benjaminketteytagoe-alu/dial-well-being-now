@@ -91,51 +91,39 @@ export interface CoachingSession {
 }
 
 export class CommunityService {
-  // Get all active forums
+  // Mock implementations until community tables are created
   static async getForums(): Promise<CommunityForum[]> {
-    try {
-      const { data: forums, error } = await supabase
-        .from('community_forums')
-        .select('*')
-        .eq('is_active', true)
-        .order('member_count', { ascending: false });
-
-      if (error) throw error;
-      return forums || [];
-    } catch (error) {
-      console.error('Error getting forums:', error);
-      throw error;
-    }
+    // Return mock data for now
+    return [
+      {
+        id: '1',
+        name: 'PCOS Support Group',
+        description: 'A supportive community for women with PCOS',
+        category: 'pcos',
+        is_peer_led: true,
+        is_active: true,
+        member_count: 156,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: '2',
+        name: 'Fibroids Awareness',
+        description: 'Educational discussions about uterine fibroids',
+        category: 'fibroids',
+        is_peer_led: false,
+        is_active: true,
+        member_count: 89,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    ];
   }
 
-  // Get forum posts
   static async getForumPosts(forumId: string, limit: number = 20, offset: number = 0): Promise<ForumPost[]> {
-    try {
-      const { data: posts, error } = await supabase
-        .from('forum_posts')
-        .select(`
-          *,
-          user:user_id (
-            id,
-            email,
-            user_metadata
-          )
-        `)
-        .eq('forum_id', forumId)
-        .eq('is_approved', true)
-        .order('is_pinned', { ascending: false })
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
-
-      if (error) throw error;
-      return posts || [];
-    } catch (error) {
-      console.error('Error getting forum posts:', error);
-      throw error;
-    }
+    return [];
   }
 
-  // Create a new forum post
   static async createForumPost(
     userId: string,
     forumId: string,
@@ -144,177 +132,34 @@ export class CommunityService {
     postType: 'discussion' | 'question' | 'experience' | 'resource' | 'announcement' = 'discussion',
     isAnonymous: boolean = false
   ): Promise<ForumPost> {
-    try {
-      // Validate inputs
-      if (!title.trim()) throw new Error('Title is required');
-      if (!content.trim()) throw new Error('Content is required');
-      if (title.length > 200) throw new Error('Title too long');
-
-      const { data: post, error } = await supabase
-        .from('forum_posts')
-        .insert({
-          forum_id: forumId,
-          user_id: userId,
-          title,
-          content,
-          post_type: postType,
-          is_anonymous: isAnonymous
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return post;
-    } catch (error) {
-      console.error('Error creating forum post:', error);
-      throw error;
-    }
+    throw new Error('Community features are not yet available. Please check back soon!');
   }
 
-  // Get forum replies
   static async getForumReplies(postId: string): Promise<ForumReply[]> {
-    try {
-      const { data: replies, error } = await supabase
-        .from('forum_replies')
-        .select(`
-          *,
-          user:user_id (
-            id,
-            email,
-            user_metadata
-          )
-        `)
-        .eq('post_id', postId)
-        .eq('is_approved', true)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      return replies || [];
-    } catch (error) {
-      console.error('Error getting forum replies:', error);
-      throw error;
-    }
+    return [];
   }
 
-  // Create a forum reply
   static async createForumReply(
     userId: string,
     postId: string,
     content: string,
     isAnonymous: boolean = false
   ): Promise<ForumReply> {
-    try {
-      // Validate input
-      if (!content.trim()) throw new Error('Content is required');
-
-      const { data: reply, error } = await supabase
-        .from('forum_replies')
-        .insert({
-          post_id: postId,
-          user_id: userId,
-          content,
-          is_anonymous: isAnonymous
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Update reply count on the post
-      try {
-        await supabase.rpc('increment_reply_count', { post_id: postId });
-      } catch (rpcError) {
-        // Attempt to rollback by deleting the reply
-        await supabase
-          .from('forum_replies')
-          .delete()
-          .eq('id', reply.id);
-        throw rpcError;
-      }
-
-      return reply;
-    } catch (error) {
-      console.error('Error creating forum reply:', error);
-      throw error;
-    }
+    throw new Error('Community features are not yet available. Please check back soon!');
   }
 
-  // Get mentorship programs
   static async getMentorshipPrograms(): Promise<MentorshipProgram[]> {
-    try {
-      const { data: programs, error } = await supabase
-        .from('mentorship_programs')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return programs || [];
-    } catch (error) {
-      console.error('Error getting mentorship programs:', error);
-      throw error;
-    }
+    return [];
   }
 
-  // Join a mentorship program
   static async joinMentorshipProgram(userId: string, programId: string): Promise<void> {
-    try {
-      // Check if already enrolled
-      const { data: existing } = await supabase
-        .from('mentorship_participants')
-        .select('id')
-        .eq('program_id', programId)
-        .eq('user_id', userId)
-        .single();
-      
-      if (existing) throw new Error('Already enrolled in this program');
-      
-      // Check capacity
-      const { data: program } = await supabase
-        .from('mentorship_programs')
-        .select('max_participants, current_participants')
-        .eq('id', programId)
-        .single();
-      
-      if (program && program.current_participants >= program.max_participants) {
-        throw new Error('Program is full');
-      }
-      
-      const { error } = await supabase
-        .from('mentorship_participants')
-        .insert({
-          program_id: programId,
-          user_id: userId
-        });
-
-      if (error) throw error;
-
-      // Update participant count
-      await supabase.rpc('increment_participant_count', { program_id: programId });
-    } catch (error) {
-      console.error('Error joining mentorship program:', error);
-      throw error;
-    }
+    throw new Error('Mentorship features are not yet available. Please check back soon!');
   }
 
-  // Get user's coaching sessions
   static async getUserCoachingSessions(userId: string): Promise<CoachingSession[]> {
-    try {
-      const { data: sessions, error } = await supabase
-        .from('coaching_sessions')
-        .select('*')
-        .eq('user_id', userId)
-        .order('session_date', { ascending: false });
-
-      if (error) throw error;
-      return sessions || [];
-    } catch (error) {
-      console.error('Error getting coaching sessions:', error);
-      throw error;
-    }
+    return [];
   }
 
-  // Book a coaching session
   static async bookCoachingSession(
     userId: string,
     sessionType: 'nutrition' | 'exercise' | 'mental_health' | 'lifestyle' | 'stress_management',
@@ -323,100 +168,21 @@ export class CommunityService {
     durationMinutes: number = 60,
     goals?: string
   ): Promise<CoachingSession> {
-    try {
-      // Validate date is in the future
-      const sessionDateTime = new Date(`${sessionDate}T${sessionTime}`);
-      if (sessionDateTime <= new Date()) {
-        throw new Error('Session must be scheduled in the future');
-      }
-
-      // Check for conflicts
-      const { data: conflicts } = await supabase
-        .from('coaching_sessions')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('session_date', sessionDate)
-        .eq('session_time', sessionTime)
-        .eq('status', 'scheduled');
-
-      if (conflicts && conflicts.length > 0) {
-        throw new Error('Time slot already booked');
-      }
-
-      const { data: session, error } = await supabase
-        .from('coaching_sessions')
-        .insert({
-          user_id: userId,
-          session_type: sessionType,
-          session_date: sessionDate,
-          session_time: sessionTime,
-          duration_minutes: durationMinutes,
-          goals
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return session;
-    } catch (error) {
-      console.error('Error booking coaching session:', error);
-      throw error;
-    }
+    throw new Error('Coaching features are not yet available. Please check back soon!');
   }
 
-  // Like a post or reply
   static async likeContent(contentType: 'post' | 'reply', contentId: string): Promise<void> {
-    try {
-      const table = contentType === 'post' ? 'forum_posts' : 'forum_replies';
-      const { error } = await supabase.rpc('increment_likes', { 
-        table_name: table, 
-        content_id: contentId 
-      });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error liking content:', error);
-      throw error;
-    }
+    throw new Error('Community features are not yet available. Please check back soon!');
   }
 
-  // Search forums and posts
   static async searchCommunity(query: string): Promise<{ forums: CommunityForum[], posts: ForumPost[] }> {
-    try {
-      // Sanitize query to prevent SQL injection
-      const sanitizedQuery = query.replace(/[%_]/g, '\\$&');
-
-      // Parallel search
-      const [forumsResult, postsResult] = await Promise.all([
-        supabase
-          .from('community_forums')
-          .select('*')
-          .or(`name.ilike.%${sanitizedQuery}%,description.ilike.%${sanitizedQuery}%`)
-          .eq('is_active', true),
-        supabase
-          .from('forum_posts')
-          .select(`
-            *,
-            user:user_id (
-              id,
-              email,
-              user_metadata
-            )
-          `)
-          .or(`title.ilike.%${sanitizedQuery}%,content.ilike.%${sanitizedQuery}%`)
-          .eq('is_approved', true)
-      ]);
-
-      if (forumsResult.error) throw forumsResult.error;
-      if (postsResult.error) throw postsResult.error;
-
-      return {
-        forums: forumsResult.data || [],
-        posts: postsResult.data || []
-      };
-    } catch (error) {
-      console.error('Error searching community:', error);
-      throw error;
-    }
+    const forums = await this.getForums();
+    return {
+      forums: forums.filter(f => 
+        f.name.toLowerCase().includes(query.toLowerCase()) ||
+        f.description.toLowerCase().includes(query.toLowerCase())
+      ),
+      posts: []
+    };
   }
 }

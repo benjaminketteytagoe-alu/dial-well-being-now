@@ -96,7 +96,7 @@ const SymptomChecker = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <AISymptomCheckerComponent onComplete={handleAnalysisComplete} />
+                <AISymptomCheckerComponent />
               </CardContent>
             </Card>
           </TabsContent>
@@ -113,10 +113,7 @@ const SymptomChecker = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ReferralEngine 
-                  initialCondition={analysisResult?.condition}
-                  onBookingComplete={handleBookingComplete}
-                />
+                <ReferralEngine />
               </CardContent>
             </Card>
           </TabsContent>

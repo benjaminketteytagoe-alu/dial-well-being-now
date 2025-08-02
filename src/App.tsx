@@ -81,7 +81,7 @@ const App = () => (
               <Route path="/symptom-checker" element={<ProtectedRoute><SymptomChecker /></ProtectedRoute>} />
               <Route path="/book-doctor" element={<ProtectedRoute><BookDoctor /></ProtectedRoute>} />
               <Route path="/teleconsultation" element={<ProtectedRoute><Teleconsultation /></ProtectedRoute>} />
-              <Route path="/teleconsultation/session/:sessionId" element={<ProtectedRoute><TeleconsultationSession /></ProtectedRoute>} />
+              <Route path="/teleconsultation/session/:sessionId" element={<ProtectedRoute><TeleconsultationSession sessionId="" /></ProtectedRoute>} />
               <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
               <Route path="/community/forum/:forumId" element={<ProtectedRoute><ForumDetail /></ProtectedRoute>} />
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
