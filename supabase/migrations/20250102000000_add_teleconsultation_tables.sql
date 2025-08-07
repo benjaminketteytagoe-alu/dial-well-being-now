@@ -15,36 +15,35 @@ CREATE TABLE IF NOT EXISTS public.teleconsultation_sessions (
     meeting_id TEXT,
     session_notes TEXT,
     prescription_notes TEXT,
-    follow_up_required BOOLEAN DEFAULT false,
+    follow_up_required BOOLEAN DEFAULT FALSE,
     follow_up_date DATE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create teleconsultation session logs table (for audit purposes, no recording data)
+-- Create doctor availability table
+CREATE TABLE IF NOT EXISTS public.doctor_teleconsultation_availability (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    doctor_id UUID REFERENCES public.doctors(id) ON DELETE CASCADE,
+    day_of_week INTEGER NOT NULL CHECK (day_of_week >= 0 AND day_of_week <= 6),
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    session_duration_minutes INTEGER DEFAULT 30,
+    max_sessions_per_day INTEGER DEFAULT 10,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create teleconsultation logs table
 CREATE TABLE IF NOT EXISTS public.teleconsultation_logs (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     session_id UUID REFERENCES public.teleconsultation_sessions(id) ON DELETE CASCADE,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     doctor_id UUID REFERENCES public.doctors(id) ON DELETE CASCADE,
-    event_type TEXT NOT NULL CHECK (event_type IN ('session_started', 'session_ended', 'prescription_given', 'follow_up_scheduled', 'session_cancelled')),
-    event_timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    event_type TEXT NOT NULL,
     event_details JSONB,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Create teleconsultation availability table
-CREATE TABLE IF NOT EXISTS public.doctor_teleconsultation_availability (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    doctor_id UUID REFERENCES public.doctors(id) ON DELETE CASCADE,
-    day_of_week INTEGER NOT NULL CHECK (day_of_week >= 0 AND day_of_week <= 6), -- 0=Sunday, 1=Monday, etc.
-    start_time TIME NOT NULL,
-    end_time TIME NOT NULL,
-    session_duration_minutes INTEGER DEFAULT 30,
-    max_sessions_per_day INTEGER DEFAULT 8,
-    is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Create indexes for better performance

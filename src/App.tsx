@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -81,7 +80,8 @@ const App = () => (
               <Route path="/symptom-checker" element={<ProtectedRoute><SymptomChecker /></ProtectedRoute>} />
               <Route path="/book-doctor" element={<ProtectedRoute><BookDoctor /></ProtectedRoute>} />
               <Route path="/teleconsultation" element={<ProtectedRoute><Teleconsultation /></ProtectedRoute>} />
-              <Route path="/teleconsultation/session/:sessionId" element={<ProtectedRoute><TeleconsultationSession sessionId="" /></ProtectedRoute>} />
+              {/* FIXED: Removed hardcoded sessionId="" prop - component now uses useParams */}
+              <Route path="/teleconsultation/session/:sessionId" element={<ProtectedRoute><TeleconsultationSession /></ProtectedRoute>} />
               <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
               <Route path="/community/forum/:forumId" element={<ProtectedRoute><ForumDetail /></ProtectedRoute>} />
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
@@ -95,5 +95,3 @@ const App = () => (
     </LanguageProvider>
   </QueryClientProvider>
 );
-
-export default App;
