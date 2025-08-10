@@ -12,8 +12,12 @@ const WelcomeStep: React.FC<WelcomeStepProps> = ({ nextStep, isFirst }) => {
   return (
     <div className="space-y-6 text-center">
       <div className="space-y-4">
-        <div className="w-20 h-20 mx-auto bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-          <Heart className="w-10 h-10 text-white" />
+        <div className="mx-auto flex justify-center">
+          <img
+            src="https://i.ibb.co/WN38dKLh/Nauri-Care-Color-B.png"
+            alt="Welcome illustration"
+            className="w-32 h-32 object-contain"
+          />
         </div>
         
         <h3 className="text-xl font-semibold text-gray-800">
