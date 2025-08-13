@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Mic, MicOff, Video, VideoOff, Phone, PhoneOff, MessageSquare, Settings } from 'lucide-react';
+import { Clock, Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, Settings } from 'lucide-react';
 
 interface TeleconsultationSessionProps {
   // Remove sessionId prop since we'll get it from URL params
@@ -92,6 +92,7 @@ const TeleconsultationSession: React.FC<TeleconsultationSessionProps> = () => {
 
       return () => clearInterval(interval);
     }
+    return;
   }, [session?.status]);
 
   const handleEndCall = () => {

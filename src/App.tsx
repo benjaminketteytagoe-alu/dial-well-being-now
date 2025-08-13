@@ -18,6 +18,8 @@ import Teleconsultation from "./pages/Teleconsultation";
 import TeleconsultationSession from "./components/TeleconsultationSession";
 import Community from "./pages/Community";
 import ForumDetail from "./pages/ForumDetail";
+import AISymptomCheckerPage from "./pages/AISymptomChecker";
+import ReferralEnginePage from "./pages/ReferralEngine";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +86,8 @@ const App = () => (
               <Route path="/teleconsultation/session/:sessionId" element={<ProtectedRoute><TeleconsultationSession /></ProtectedRoute>} />
               <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
               <Route path="/community/forum/:forumId" element={<ProtectedRoute><ForumDetail /></ProtectedRoute>} />
+              <Route path="/ai-symptom-checker" element={<ProtectedRoute><AISymptomCheckerPage /></ProtectedRoute>} />
+              <Route path="/referral-engine" element={<ProtectedRoute><ReferralEnginePage /></ProtectedRoute>} />
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>

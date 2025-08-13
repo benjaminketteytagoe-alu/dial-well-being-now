@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -63,13 +63,13 @@ const SymptomChecker = () => {
               ))}
             </div>
             <CardTitle className="text-2xl font-bold text-gray-800">
-              {currentStep < questions.length ? questions[currentStep].question : "Assessment Complete"}
+              {currentStep < questions.length ? questions[currentStep]?.question : "Assessment Complete"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {currentStep < questions.length ? (
               <div className="grid gap-3">
-                {questions[currentStep].options.map((option, index) => (
+                {questions[currentStep]?.options?.map((option, index) => (
                   <Button
                     key={index}
                     variant="outline"
