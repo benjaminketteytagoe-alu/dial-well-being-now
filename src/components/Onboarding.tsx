@@ -1,6 +1,5 @@
 
-import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import WelcomeStep from "./onboarding/WelcomeStep";
 import PersonalInfoStep from "./onboarding/PersonalInfoStep";

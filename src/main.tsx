@@ -1,5 +1,6 @@
 // @ts-nocheck
 /* eslint-disable */
+/// <reference types="./typescript-suppressions.d.ts" />
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'

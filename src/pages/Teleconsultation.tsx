@@ -352,10 +352,10 @@ const Teleconsultation = () => {
                                 <Icon className="w-5 h-5 text-blue-500" />
                                 <div>
                                   <div className="font-semibold">
-                                    {session.doctors?.name || 'Unknown Doctor'}
+                                    {session.doctor?.name || 'Unknown Doctor'}
                                   </div>
                                   <div className="text-sm text-gray-600">
-                                    {session.doctors?.specialty || 'General'}
+                                    {session.doctor?.specialty || 'General'}
                                   </div>
                                   <div className="text-sm text-gray-500">
                                     {format(new Date(session.scheduled_start_time), 'PPP p')}
