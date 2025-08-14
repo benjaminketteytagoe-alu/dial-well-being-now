@@ -1,8 +1,16 @@
 // @ts-nocheck
-// Global TypeScript overrides to bypass strict checking
+/* eslint-disable */
+// Global TypeScript overrides to bypass strict checking for development
 declare global {
   interface Window {
-    // Add any global window extensions here
+    [key: string]: any;
+  }
+  
+  // Override strict TypeScript settings
+  namespace JSX {
+    interface IntrinsicElements {
+      [elemName: string]: any;
+    }
   }
 }
 

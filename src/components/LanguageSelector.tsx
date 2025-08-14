@@ -3,7 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useLanguage, Language } from '@/contexts/LanguageContext';
 
 export const LanguageSelector: React.FC = () => {
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage } = useLanguage();
 
   const languages = [
     { code: 'en' as Language, name: 'English', flag: '🇺🇸' },

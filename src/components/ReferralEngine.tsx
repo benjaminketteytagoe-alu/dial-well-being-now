@@ -8,8 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Phone, Star, Building, User, Calendar } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useLanguage } from '@/contexts/LanguageContext';
-
 interface Facility {
   id: string;
   name: string;
@@ -48,7 +46,6 @@ const ReferralEngine: React.FC = () => {
   const [facilityType, setFacilityType] = useState<'all' | 'hospital' | 'clinic'>('all');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { t } = useLanguage();
 
   useEffect(() => {
     fetchSpecializations();

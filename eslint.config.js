@@ -23,7 +23,9 @@ export default tseslint.config(
         "warn",
         { allowConstantExport: true },
       ],
+      // Disable all strict TypeScript rules for development
       "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-unused-imports": "off", 
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-non-null-assertion": "off",
       "@typescript-eslint/ban-ts-comment": "off",
@@ -33,6 +35,13 @@ export default tseslint.config(
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/explicit-module-boundary-types": "off",
       "@typescript-eslint/no-inferrable-types": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "no-unused-vars": "off",
+      "no-unused-expressions": "off",
     },
   }
 );

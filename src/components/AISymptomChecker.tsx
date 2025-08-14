@@ -8,8 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Activity, Clock, Stethoscope } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useLanguage } from '@/contexts/LanguageContext';
-
 interface AnalysisResult {
   riskAssessment: 'Low' | 'Moderate' | 'High' | 'Unable to assess';
   potentialConditions: string[];
@@ -28,7 +26,6 @@ const AISymptomChecker: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const { toast } = useToast();
-  const { t } = useLanguage();
 
   const handleAnalyze = async () => {
     if (!symptoms.trim()) {
