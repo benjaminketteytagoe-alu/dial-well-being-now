@@ -25,7 +25,7 @@ const Community = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  // const { t } = useLanguage();
   
   const [loading, setLoading] = useState(true);
   const [forums, setForums] = useState<CommunityForum[]>([]);

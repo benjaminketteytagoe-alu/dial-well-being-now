@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+// import { supabase } from '@/integrations/supabase/client';
 
 export interface CommunityForum {
   id: string;
@@ -152,7 +152,7 @@ export class CommunityService {
     return [];
   }
 
-  static async joinMentorshipProgram(userId: string, programId: string): Promise<void> {
+  static async joinMentorshipProgram(_userId: string, _programId: string): Promise<void> {
     throw new Error('Mentorship features are not yet available. Please check back soon!');
   }
 
@@ -171,7 +171,7 @@ export class CommunityService {
     throw new Error('Coaching features are not yet available. Please check back soon!');
   }
 
-  static async likeContent(contentType: 'post' | 'reply', contentId: string): Promise<void> {
+  static async likeContent(_contentType: 'post' | 'reply', _contentId: string): Promise<void> {
     throw new Error('Community features are not yet available. Please check back soon!');
   }
 

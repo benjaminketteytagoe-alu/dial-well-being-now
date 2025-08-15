@@ -173,8 +173,8 @@ export class TeleconsultationService {
       const { data: session, error } = await supabase
         .from('teleconsultation_sessions')
         .insert({
-          user_id: userId,
-          doctor_id: doctorId,
+      user_id: userId,
+      doctor_id: doctorId || '',
           session_type: sessionType,
           scheduled_start_time: scheduledStartTime,
           scheduled_end_time: scheduledEndTime,
@@ -360,7 +360,7 @@ export class TeleconsultationService {
         .insert({
           session_id: sessionId,
           user_id: userId,
-          doctor_id: doctorId,
+          doctor_id: doctorId || '',
           event_type: eventType,
           event_details: eventDetails
         });
