@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { Button } from "@/components/ui/button";
 import { CheckCircle, ArrowRight } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +9,7 @@ interface CompletionStepProps {
   isLast: boolean;
 }
 
-const CompletionStep = ({ userData, prevStep, isLast }: CompletionStepProps) => {
+const CompletionStep = ({ userData, prevStep }: CompletionStepProps) => {
   const navigate = useNavigate();
 
   const handleComplete = () => {

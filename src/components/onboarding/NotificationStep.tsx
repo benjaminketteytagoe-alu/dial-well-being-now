@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -19,13 +18,12 @@ interface NotificationStepProps {
   isFirst: boolean;
 }
 
-const NotificationStep: React.FC<NotificationStepProps> = ({
+const NotificationStep = ({
   userData,
   updateUserData,
   nextStep,
-  prevStep,
-  isFirst
-}) => {
+  prevStep
+}: NotificationStepProps) => {
   const handleNotificationChange = (key: string, value: boolean) => {
     updateUserData({
       notifications: {

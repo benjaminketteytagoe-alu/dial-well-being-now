@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -14,13 +13,12 @@ interface HealthPreferencesStepProps {
   isFirst: boolean;
 }
 
-const HealthPreferencesStep: React.FC<HealthPreferencesStepProps> = ({
+const HealthPreferencesStep = ({
   userData,
   updateUserData,
   nextStep,
-  prevStep,
-  isFirst
-}) => {
+  prevStep
+}: HealthPreferencesStepProps) => {
   const healthOptions = [
     { id: 'fibroids', label: 'Fibroids', description: 'Non-cancerous growths in the uterus' },
     { id: 'pcos', label: 'PCOS', description: 'Polycystic Ovary Syndrome' },
