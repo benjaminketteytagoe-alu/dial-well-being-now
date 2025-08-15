@@ -8,7 +8,7 @@ interface WelcomeStepProps {
   isFirst: boolean;
 }
 
-const WelcomeStep: React.FC<WelcomeStepProps> = ({ nextStep, isFirst }) => {
+const WelcomeStep: React.FC<WelcomeStepProps> = ({ nextStep }) => {
   return (
     <div className="space-y-6 text-center">
       <div className="space-y-4">

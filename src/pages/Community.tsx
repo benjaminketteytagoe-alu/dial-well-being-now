@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,21 +10,16 @@ import {
   Search, 
   Plus, 
   Heart, 
-  Reply, 
-  Eye, 
-  Pin,
-  User,
   Calendar,
   Clock,
   Target,
-  BookOpen,
-  Star
+  BookOpen
 } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { CommunityService, CommunityForum, ForumPost, MentorshipProgram, CoachingSession } from '@/services/communityService';
+import { CommunityService, CommunityForum, MentorshipProgram, CoachingSession } from '@/services/communityService';
 
 const Community = () => {
   const navigate = useNavigate();
