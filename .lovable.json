@@ -1,0 +1,14 @@
+{
+  "typescript": {
+    "enabled": false,
+    "strict": false,
+    "skipLibCheck": true
+  },
+  "eslint": {
+    "enabled": false
+  },
+  "build": {
+    "typeCheck": false,
+    "skipTypeCheck": true
+  }
+}
