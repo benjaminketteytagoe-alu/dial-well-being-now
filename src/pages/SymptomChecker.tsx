@@ -4,9 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { SymptomChecker } from '@/components/SymptomChecker';
-import { AISymptomChecker } from '@/components/AISymptomChecker';
-import { ReferralEngine } from '@/components/ReferralEngine';
+import SymptomChecker from '@/components/SymptomChecker';
+import AISymptomChecker from '@/components/AISymptomChecker';
+import ReferralEngine from '@/components/ReferralEngine';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AIAnalysisResult, ReferralRecommendation } from '@/types';
 

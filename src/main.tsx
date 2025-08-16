@@ -1,14 +1,5 @@
 // @ts-nocheck
 /* eslint-disable */
-
-import '../ts-override.config.js';
-import './typescript-override-complete';
-import './lib/eslint-disable';
-import './globals-fix';
-import './typescript-disable';
-import './typescript-suppressions';
-import './global-ts-disable';
-import './globals-overrides';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';

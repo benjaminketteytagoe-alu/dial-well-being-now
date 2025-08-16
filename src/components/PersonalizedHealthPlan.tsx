@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,7 +27,7 @@ interface HealthTask {
   category: 'medication' | 'exercise' | 'hydration' | 'nutrition' | 'checkup';
   priority: 'low' | 'medium' | 'high';
   frequency: 'daily' | 'weekly' | 'monthly';
-  time_of_day?: string;
+  time_of_day: string | null;
   is_completed: boolean;
   due_date: string;
   reminder_enabled: boolean;
@@ -50,7 +49,7 @@ const PersonalizedHealthPlan = () => {
   const { toast } = useToast();
   const [tasks, setTasks] = useState<HealthTask[]>([]);
   const [goals, setGoals] = useState<HealthGoal[]>([]);
-  const [, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [streakCount, setStreakCount] = useState(0);
 
   useEffect(() => {
@@ -99,6 +98,7 @@ const PersonalizedHealthPlan = () => {
           category: 'hydration',
           priority: 'medium',
           frequency: 'daily',
+          time_of_day: null,
           is_completed: false,
           due_date: new Date().toISOString().split('T')[0],
           reminder_enabled: true
@@ -110,6 +110,7 @@ const PersonalizedHealthPlan = () => {
           category: 'checkup',
           priority: 'high',
           frequency: 'monthly',
+          time_of_day: null, // Add this line
           is_completed: false,
           due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           reminder_enabled: true
@@ -198,12 +199,12 @@ const PersonalizedHealthPlan = () => {
 
   const getTodaysTasks = () => {
     const today = new Date().toISOString().split('T')[0];
-    return tasks.filter(task => task.due_date === today);
+    return tasks.filter((task: HealthTask) => task.due_date === today);
   };
 
   const getUpcomingTasks = () => {
     const today = new Date().toISOString().split('T')[0];
-    return tasks.filter(task => task.due_date > today);
+    return tasks.filter((task: HealthTask) => task.due_date > today);
   };
 
   const getCompletionRate = () => {
