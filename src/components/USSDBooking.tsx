@@ -10,8 +10,6 @@ import {
   Phone, 
   MessageSquare, 
   Globe, 
-  Calendar, 
-  Clock,
   MapPin,
   Users,
   CheckCircle2,
@@ -141,7 +139,7 @@ const USSDBooking = () => {
 
   const nextStep = () => {
     const steps = ussdSteps[selectedLanguage] || ussdSteps.en;
-    if (currentStep < steps.length - 1) {
+    if (steps && currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       setShowDemo(false);
@@ -158,7 +156,8 @@ const USSDBooking = () => {
     setCurrentStep(0);
   };
 
-  const currentStepData = (ussdSteps[selectedLanguage] || ussdSteps.en)[currentStep];
+  const currentSteps = ussdSteps[selectedLanguage] || ussdSteps.en;
+  const currentStepData = currentSteps?.[currentStep];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-6">
@@ -363,7 +362,7 @@ const USSDBooking = () => {
                   <CardTitle className="flex items-center justify-between">
                     <span>USSD Interface</span>
                     <Badge variant="outline">
-                      Step {currentStep + 1} of {(ussdSteps[selectedLanguage] || ussdSteps.en).length}
+                      Step {currentStep + 1} of {currentSteps?.length || 0}
                     </Badge>
                   </CardTitle>
                   <CardDescription>
@@ -388,9 +387,9 @@ const USSDBooking = () => {
                     <Button 
                       onClick={nextStep} 
                       className="w-full"
-                      disabled={currentStep === (ussdSteps[selectedLanguage] || ussdSteps.en).length - 1}
+                      disabled={currentStep === (currentSteps?.length || 1) - 1}
                     >
-                      {currentStep === (ussdSteps[selectedLanguage] || ussdSteps.en).length - 1 
+                      {currentStep === (currentSteps?.length || 1) - 1
                         ? 'Complete Booking' 
                         : 'Next Step'
                       }

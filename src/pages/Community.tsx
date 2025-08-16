@@ -18,7 +18,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { useLanguage } from '@/contexts/LanguageContext';
+
 import { CommunityService, CommunityForum, MentorshipProgram, CoachingSession } from '@/services/communityService';
 
 const Community = () => {

@@ -1,12 +1,12 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Brain, Navigation, Stethoscope, Users, BookOpen } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { useLanguage } from '@/contexts/LanguageContext';
+
 import AISymptomCheckerComponent from '@/components/AISymptomChecker';
 import ReferralEngine from '@/components/ReferralEngine';
 import { AIAnalysisResult, ReferralRecommendation } from '@/services/aiService';
@@ -14,10 +14,9 @@ import { AIAnalysisResult, ReferralRecommendation } from '@/services/aiService';
 const SymptomChecker = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('symptom-checker');
-  const [analysisResult, setAnalysisResult] = useState<AIAnalysisResult | null>(null);
-  const [referralResults, setReferralResults] = useState<ReferralRecommendation[]>([]);
+  const [, setAnalysisResult] = useState<AIAnalysisResult | null>(null);
+  const [, setReferralResults] = useState<ReferralRecommendation[]>([]);
 
   const handleAnalysisComplete = (analysis: AIAnalysisResult, referrals: ReferralRecommendation[]) => {
     setAnalysisResult(analysis);
@@ -30,14 +29,14 @@ const SymptomChecker = () => {
     });
   };
 
-  const handleBookingComplete = (booking: any) => {
+  const handleBookingComplete = (_booking: any) => {
     toast({
       title: "Booking Submitted",
       description: "Your appointment request has been submitted successfully.",
     });
     
     // Here you would typically save the booking to your database
-    console.log('Booking submitted:', booking);
+    console.log('Booking submitted:', _booking);
   };
 
   return (
