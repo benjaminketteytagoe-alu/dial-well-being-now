@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -18,6 +20,8 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [gender, setGender] = useState('');
+  const [signupReason, setSignupReason] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, signInWithGoogle, user } = useAuth();
   const navigate = useNavigate();
@@ -30,7 +34,7 @@ const Auth = () => {
     }
   }, [user, navigate]);
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
     setLoading(true);
     
@@ -52,11 +56,11 @@ const Auth = () => {
     setLoading(false);
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
     setLoading(true);
     
-    const { error } = await signUp(email, password, fullName);
+    const { error } = await signUp(email, password, fullName, gender, signupReason);
     
     if (error) {
       toast({
@@ -189,10 +193,50 @@ const Auth = () => {
                     required
                   />
                 </div>
+                <div>
+                  <Label>Gender</Label>
+                  <RadioGroup value={gender} onValueChange={setGender} className="flex flex-wrap gap-4 mt-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="male" id="male" />
+                      <Label htmlFor="male">Male</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="female" id="female" />
+                      <Label htmlFor="female">Female</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="other" id="other" />
+                      <Label htmlFor="other">Other</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="prefer_not_to_say" id="prefer_not_to_say" />
+                      <Label htmlFor="prefer_not_to_say">Prefer not to say</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+                <div>
+                  <Label htmlFor="signupReason">Why are you joining NauriCare?</Label>
+                  <Select value={signupReason} onValueChange={setSignupReason}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your primary reason" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="reproductive_health">Reproductive Health</SelectItem>
+                      <SelectItem value="pregnancy_tracking">Pregnancy Tracking</SelectItem>
+                      <SelectItem value="fertility_planning">Fertility Planning</SelectItem>
+                      <SelectItem value="menstrual_health">Menstrual Health</SelectItem>
+                      <SelectItem value="general_wellness">General Wellness</SelectItem>
+                      <SelectItem value="healthcare_access">Healthcare Access</SelectItem>
+                      <SelectItem value="teleconsultation">Teleconsultation</SelectItem>
+                      <SelectItem value="health_education">Health Education</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Button 
                   type="submit" 
                   className="w-full bg-primary hover:bg-primary/90"
-                  disabled={loading}
+                  disabled={loading || !gender || !signupReason}
                 >
                   {loading ? t('auth.creatingAccount') : t('auth.signUp')}
                 </Button>

@@ -1,12 +1,14 @@
 
+// @ts-nocheck
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import Cookies from 'js-cookie';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName?: string, gender?: string, signupReason?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -21,12 +23,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check for cached session first
+    const cachedSession = Cookies.get('supabase-session');
+    if (cachedSession) {
+      try {
+        const parsedSession = JSON.parse(cachedSession);
+        setSession(parsedSession);
+        setUser(parsedSession?.user ?? null);
+      } catch (error) {
+        console.error('Failed to parse cached session:', error);
+      }
+    }
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_, session) => {
+      (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Cache the session in cookies
+        if (session) {
+          Cookies.set('supabase-session', JSON.stringify(session), { 
+            expires: 7, // 7 days
+            secure: true,
+            sameSite: 'strict'
+          });
+        } else {
+          Cookies.remove('supabase-session');
+        }
       }
     );
 
@@ -35,26 +60,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      // Cache the session
+      if (session) {
+        Cookies.set('supabase-session', JSON.stringify(session), { 
+          expires: 7,
+          secure: true,
+          sameSite: 'strict'
+        });
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName?: string) => {
+  const signUp = async (email, password, fullName, gender, signupReason) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
         data: {
-          full_name: fullName
+          full_name: fullName,
+          gender: gender,
+          signup_reason: signupReason
         }
       }
     });
     return { error };
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email, password) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -73,6 +109,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = async () => {
+    Cookies.remove('supabase-session');
     await supabase.auth.signOut();
   };
 

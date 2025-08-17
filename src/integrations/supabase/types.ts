@@ -160,28 +160,37 @@ export type Database = {
           created_at: string
           date_of_birth: string | null
           full_name: string | null
+          gender: Database["public"]["Enums"]["gender_type"] | null
           id: string
           location: string | null
           phone_number: string | null
+          signup_reason: Database["public"]["Enums"]["signup_reason"] | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           date_of_birth?: string | null
           full_name?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
           id: string
           location?: string | null
           phone_number?: string | null
+          signup_reason?: Database["public"]["Enums"]["signup_reason"] | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           date_of_birth?: string | null
           full_name?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
           location?: string | null
           phone_number?: string | null
+          signup_reason?: Database["public"]["Enums"]["signup_reason"] | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -298,7 +307,17 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      gender_type: "male" | "female" | "other" | "prefer_not_to_say"
+      signup_reason:
+        | "reproductive_health"
+        | "pregnancy_tracking"
+        | "fertility_planning"
+        | "menstrual_health"
+        | "general_wellness"
+        | "healthcare_access"
+        | "teleconsultation"
+        | "health_education"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -425,6 +444,19 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      gender_type: ["male", "female", "other", "prefer_not_to_say"],
+      signup_reason: [
+        "reproductive_health",
+        "pregnancy_tracking",
+        "fertility_planning",
+        "menstrual_health",
+        "general_wellness",
+        "healthcare_access",
+        "teleconsultation",
+        "health_education",
+        "other",
+      ],
+    },
   },
 } as const
