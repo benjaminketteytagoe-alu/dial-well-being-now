@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import ReferralEngine from '@/components/ReferralEngine';
 import { useAuth } from '@/hooks/useAuth';

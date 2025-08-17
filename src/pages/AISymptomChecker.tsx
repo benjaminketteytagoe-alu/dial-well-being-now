@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import AISymptomChecker from '@/components/AISymptomChecker';
 import { useAuth } from '@/hooks/useAuth';

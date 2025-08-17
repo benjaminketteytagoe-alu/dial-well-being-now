@@ -120,30 +120,30 @@ export class CommunityService {
     ];
   }
 
-  static async getForumPosts(forumId: string, limit: number = 20, offset: number = 0): Promise<ForumPost[]> {
+  static async getForumPosts(_forumId: string, _limit: number = 20, _offset: number = 0): Promise<ForumPost[]> {
     return [];
   }
 
   static async createForumPost(
-    userId: string,
-    forumId: string,
-    title: string,
-    content: string,
-    postType: 'discussion' | 'question' | 'experience' | 'resource' | 'announcement' = 'discussion',
-    isAnonymous: boolean = false
+    _userId: string,
+    _forumId: string,
+    _title: string,
+    _content: string,
+    _postType: 'discussion' | 'question' | 'experience' | 'resource' | 'announcement' = 'discussion',
+    _isAnonymous: boolean = false
   ): Promise<ForumPost> {
     throw new Error('Community features are not yet available. Please check back soon!');
   }
 
-  static async getForumReplies(postId: string): Promise<ForumReply[]> {
+  static async getForumReplies(_postId: string): Promise<ForumReply[]> {
     return [];
   }
 
   static async createForumReply(
-    userId: string,
-    postId: string,
-    content: string,
-    isAnonymous: boolean = false
+    _userId: string,
+    _postId: string,
+    _content: string,
+    _isAnonymous: boolean = false
   ): Promise<ForumReply> {
     throw new Error('Community features are not yet available. Please check back soon!');
   }
@@ -156,17 +156,17 @@ export class CommunityService {
     throw new Error('Mentorship features are not yet available. Please check back soon!');
   }
 
-  static async getUserCoachingSessions(userId: string): Promise<CoachingSession[]> {
+  static async getUserCoachingSessions(_userId: string): Promise<CoachingSession[]> {
     return [];
   }
 
   static async bookCoachingSession(
-    userId: string,
-    sessionType: 'nutrition' | 'exercise' | 'mental_health' | 'lifestyle' | 'stress_management',
-    sessionDate: string,
-    sessionTime: string,
-    durationMinutes: number = 60,
-    goals?: string
+    _userId: string,
+    _sessionType: 'nutrition' | 'exercise' | 'mental_health' | 'lifestyle' | 'stress_management',
+    _sessionDate: string,
+    _sessionTime: string,
+    _durationMinutes: number = 60,
+    _goals?: string
   ): Promise<CoachingSession> {
     throw new Error('Coaching features are not yet available. Please check back soon!');
   }
