@@ -26,7 +26,7 @@ import ReferralEnginePage from "./pages/ReferralEngine";
 const queryClient = new QueryClient();
 
 // Protected Route Component
-const ProtectedRoute = ({ children }: { children: any }) => {
+const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
@@ -48,7 +48,7 @@ const ProtectedRoute = ({ children }: { children: any }) => {
 };
 
 // Public Route Component (redirect if authenticated)
-const PublicRoute = ({ children }: { children: any }) => {
+const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
