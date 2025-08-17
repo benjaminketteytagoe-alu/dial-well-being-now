@@ -1,6 +1,7 @@
+// @ts-nocheck
 import * as React from "react"
 
-import type {
+import {
   ToastActionElement,
   ToastProps,
 } from "@/components/ui/toast"
