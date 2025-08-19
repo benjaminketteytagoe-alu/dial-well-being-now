@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signUp = async (email, password, fullName, gender, signupReason) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -86,7 +86,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           signup_reason: signupReason
         }
       }
-    });
+    } );
+    console.log(data)
     return { error };
   };
 
