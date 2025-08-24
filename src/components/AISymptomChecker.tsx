@@ -19,13 +19,15 @@ interface AnalysisResult {
   disclaimer: string;
 }
 
-const AISymptomChecker: React.FC = () => {
-  const [symptoms, setSymptoms] = useState('');
-  const [age, setAge] = useState('');
-  const [medicalHistory, setMedicalHistory] = useState('');
-  const [currentMedications, setCurrentMedications] = useState('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+const AISymptomCheckerPage = () =>
+{
+  const { user, loading } = useAuth();
+  const [ symptoms, setSymptoms ] = useState( '' );
+  const [ age, setAge ] = useState( '' );
+  const [ medicalHistory, setMedicalHistory ] = useState( '' );
+  const [ currentMedications, setCurrentMedications ] = useState( '' );
+  const [ isAnalyzing, setIsAnalyzing ] = useState( false );
+  const [ analysisResult, setAnalysisResult ] = useState<AnalysisResult | null>( null );
   const { toast } = useToast();
 
   const handleAnalyze = async () => {

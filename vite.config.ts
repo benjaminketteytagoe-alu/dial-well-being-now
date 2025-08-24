@@ -7,12 +7,8 @@ import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
   plugins: [
-    react({
-      // Disable TypeScript transpilation entirely
-      typescript: false,
-    }),
-    mode === 'development' &&
-    componentTagger(),
+    react(),
+    mode === 'development' && componentTagger()
   ].filter(Boolean),
   resolve: {
     alias: {
