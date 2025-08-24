@@ -281,4 +281,4 @@ const AISymptomCheckerPage = () =>
   );
 };
 
-export default AISymptomChecker;
+export default AISymptomCheckerPage;
