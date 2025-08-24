@@ -33,7 +33,7 @@ export default defineConfig( ( { mode } ) => ( {
   build: {
     base: './', // ✅ ensures assets load correctly on Netlify
     rollupOptions: {
-      onwarn: () => { }, // Suppress warnings if needed
+      onwarn: () => { }, // suppress warnings
       output: {
         entryFileNames: "[name].[hash].js",
         chunkFileNames: "[name].[hash].js",
