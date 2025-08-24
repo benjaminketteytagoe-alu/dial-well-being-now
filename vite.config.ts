@@ -19,7 +19,6 @@ export default defineConfig( ( { mode } ) => ( {
     host: "::",
     port: 8080,
   },
-  // ✅ Remove the "loader: 'jsx'" override so TypeScript works
   esbuild: {
     tsconfigRaw: {
       compilerOptions: {
@@ -32,8 +31,9 @@ export default defineConfig( ( { mode } ) => ( {
     },
   },
   build: {
+    base: './', // ✅ ensures assets load correctly on Netlify
     rollupOptions: {
-      onwarn: () => { }, // Suppress warnings if you want
+      onwarn: () => { }, // Suppress warnings if needed
       output: {
         entryFileNames: "[name].[hash].js",
         chunkFileNames: "[name].[hash].js",
